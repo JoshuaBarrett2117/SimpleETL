@@ -93,12 +93,12 @@ public class ElementSplitIteratorTest extends AbstractMain {
     }
 
     @Override
-    protected IDataSource getDataSource(Properties properties) {
+    protected IDataSource dataSource(Properties properties) {
         return new ElasticsearchSource(properties);
     }
 
     @Override
-    protected IDataTarget getDataTarget(Properties properties) {
+    protected IDataTarget dataTarget(Properties properties) {
         RdbDataSource rdbDataSource = new RdbDataSource(properties);
         Connection connection = rdbDataSource.getConnection();
         Software software = new Software();

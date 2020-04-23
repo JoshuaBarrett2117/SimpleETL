@@ -53,6 +53,9 @@ public class StringSplitTranser implements IIteratorTranser {
                         List<DomainElement> elements = new ArrayList<>();
                         for (String word : words) {
                             DomainElement d = new DomainElement();
+                            for (Map.Entry<String, Object> entry : next.getProperties().entrySet()) {
+                                d.addProperties(entry.getKey(), entry.getValue());
+                            }
                             d.addProperties(key, word);
                             elements.add(d);
                         }

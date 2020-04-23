@@ -17,6 +17,8 @@ import java.util.Properties;
  * @Date 2020/3/31 9:43
  */
 public abstract class AbstractMain {
+    private IDataTarget target;
+    private IDataSource source;
 
     private IIteratorTranser nullDealTranser = new IIteratorTranser() {
         @Override
@@ -50,10 +52,10 @@ public abstract class AbstractMain {
             };
         }
     };
+    private static Properties properties;
 
-
-    public void deal(IDataSource.Exp sourceSql, String targetTableName) {
-        Properties properties = new Properties();
+    static {
+        properties = new Properties();
         try {
             InputStreamReader inputStreamReader = new InputStreamReader(
                     FJSDLWZDataSourceMain.class.getResourceAsStream("/prop.properties"),
@@ -62,13 +64,19 @@ public abstract class AbstractMain {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public void deal(IDataSource.Exp sourceSql, String targetTableName) {
+        Iterator<DomainElement> iterator = dealTranser(sourceSql);
+        if (target != null) {
+            save(target, iterator, targetTableName);
+        }
+    }
 
-        IDataSource source = getDataSource(properties);
-
+    public Iterator<DomainElement> dealTranser(IDataSource.Exp sourceSql) {
+        source = dataSource(properties);
+        target = dataTarget(properties);
         Iterator<DomainElement> iterator = source.iterator(sourceSql);
-        //输出
-        IDataTarget target = getDataTarget(properties);
         //转换
         List<IIteratorTranser> transers = getTransers();
         if (transers != null) {
@@ -77,17 +85,17 @@ public abstract class AbstractMain {
                 iterator = transer.transIterator(nullIterator);
             }
         }
-        //开始写入
-        save(target, iterator, targetTableName);
+        return iterator;
     }
 
-    protected abstract IDataSource getDataSource(Properties properties);
+
+    protected abstract IDataSource dataSource(Properties properties);
 
     protected List<IIteratorTranser> getTransers() {
         return null;
     }
 
-    protected abstract IDataTarget getDataTarget(Properties properties);
+    protected abstract IDataTarget dataTarget(Properties properties);
 
     private static void save(IDataTarget target, Iterator<DomainElement> iter, String tableName) {
         long count = 0;
@@ -116,5 +124,12 @@ public abstract class AbstractMain {
         System.out.println("结束，共" + count + "条数据");
         System.out.println("总耗时[" + cost + "]ms");
         System.out.println("总速度[" + ((double) (count % 5000) / cost * 1000) + "]条/s");
+    }
+
+    public IDataTarget getTarget() {
+        return target;
+    }
+    public IDataSource getSource() {
+        return source;
     }
 }

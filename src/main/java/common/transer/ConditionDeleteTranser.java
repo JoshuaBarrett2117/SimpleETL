@@ -12,9 +12,11 @@ import java.util.Iterator;
  */
 public class ConditionDeleteTranser implements IIteratorTranser {
     private Condition condition;
+    private String key;
 
-    public ConditionDeleteTranser(Condition condition) {
+    public ConditionDeleteTranser(String key, Condition condition) {
         this.condition = condition;
+        this.key = key;
     }
 
     @Override
@@ -35,7 +37,7 @@ public class ConditionDeleteTranser implements IIteratorTranser {
             @Override
             public DomainElement next() {
                 DomainElement next = iterator.next();
-                if (condition.isFilter(next)) {
+                if (condition.isFilter(next, key)) {
                     count++;
                     return null;
                 }
@@ -45,6 +47,6 @@ public class ConditionDeleteTranser implements IIteratorTranser {
     }
 
     public interface Condition {
-        boolean isFilter(DomainElement domainElement);
+        boolean isFilter(DomainElement domainElement, String key);
     }
 }

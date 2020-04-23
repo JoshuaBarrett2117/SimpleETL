@@ -73,4 +73,9 @@ public class ElasticsearchTarget implements IDataTarget {
     public boolean save(List<DomainElement> docs, String indexName) {
         return index(client, indexName, indexName, docs);
     }
+
+    @Override
+    public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
+        throw new RuntimeException("暂不支持");
+    }
 }

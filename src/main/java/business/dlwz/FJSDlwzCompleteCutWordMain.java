@@ -35,13 +35,13 @@ public class FJSDlwzCompleteCutWordMain extends AbstractMain {
 //        }
 
         IDataSource.Exp exp = new IDataSource.Exp(
-                "select concat(concat(concat(concat(PNAME,CITYNAME),ADNAME),ADDRESS),NAME) as " + FJSDlwzCompleteCutWordMain.key + "  from PY_AMAP_LBS_INFO"
+                "select concat(concat(concat(concat(PNAME,CITYNAME),ADNAME),ADDRESS),NAME) as " + FJSDlwzCompleteCutWordMain.key + "  from PY_AMAP_LBS_INFO where ADDRESS !='[]'"
         );
         new FJSDlwzCompleteCutWordMain().deal(exp, "COMPLETE_DLWZ_FC_TEST");
     }
 
     @Override
-    protected IDataSource getDataSource(Properties properties) {
+    protected IDataSource dataSource(Properties properties) {
         Connection connection = getConnection(properties);
         Software software = getSoftware();
         //输入源
@@ -56,7 +56,7 @@ public class FJSDlwzCompleteCutWordMain extends AbstractMain {
     }
 
     @Override
-    protected IDataTarget getDataTarget(Properties properties) {
+    protected IDataTarget dataTarget(Properties properties) {
         Connection connection = getConnection(properties);
         Software software = getSoftware();
         //输入源

@@ -24,7 +24,7 @@ public class GXCToDictMain extends AbstractMain {
     }
 
     @Override
-    protected IDataSource getDataSource(Properties properties) {
+    protected IDataSource dataSource(Properties properties) {
         return new FileSource("C:\\Users\\joshua\\Desktop\\文本提取\\人人关系词去重.txt");
     }
 
@@ -54,7 +54,7 @@ public class GXCToDictMain extends AbstractMain {
     }
 
     @Override
-    protected IDataTarget getDataTarget(Properties properties) {
+    protected IDataTarget dataTarget(Properties properties) {
 //        return new FileTarget("C:\\Users\\joshua\\Desktop\\文本提取\\人或地点之间的关系词.txt", "text");
         return new ElasticsearchTarget(properties);
     }

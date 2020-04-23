@@ -17,7 +17,13 @@ import java.util.List;
  * @Date 2020/4/20 10:31
  */
 public class DlwzHanLpTranser implements IIteratorTranser {
-    private static final Segment segment = HanLP.newSegment();
+    private static Segment segment;
+
+    static {
+        segment = HanLP.newSegment();
+        segment.enableCustomDictionary(true);
+    }
+
     private String key;
 
     public DlwzHanLpTranser(String key) {

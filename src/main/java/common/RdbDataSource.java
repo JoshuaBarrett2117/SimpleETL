@@ -57,7 +57,7 @@ public class RdbDataSource {
     /**
      * - 关闭数据库
      */
-    protected void close(Connection conn, PreparedStatement ps, ResultSet rs) {
+    public void close(Connection conn, PreparedStatement ps, ResultSet rs) {
         try {
             if (rs != null) {
                 rs.close();

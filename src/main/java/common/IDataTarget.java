@@ -11,4 +11,5 @@ import java.util.List;
  */
 public interface IDataTarget {
     boolean save(List<DomainElement> docs, String indexName);
+    boolean saveOrUpdate(List<DomainElement> docs, String indexName);
 }

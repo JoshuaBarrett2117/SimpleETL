@@ -67,4 +67,9 @@ public class FileTarget implements IDataTarget {
         }
         return true;
     }
+
+    @Override
+    public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
+        throw new RuntimeException("暂不支持");
+    }
 }

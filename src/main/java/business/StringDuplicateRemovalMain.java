@@ -50,12 +50,12 @@ public class StringDuplicateRemovalMain extends AbstractMain {
     };
 
     @Override
-    protected IDataSource getDataSource(Properties properties) {
+    protected IDataSource dataSource(Properties properties) {
         return new FileSource("C:/Users/joshua/Desktop/文本提取/人人关系词.txt");
     }
 
     @Override
-    protected IDataTarget getDataTarget(Properties properties) {
+    protected IDataTarget dataTarget(Properties properties) {
         return new FileTarget("C:/Users/joshua/Desktop/文本提取/nr、ns之间关系词.txt", "text");
     }
 }

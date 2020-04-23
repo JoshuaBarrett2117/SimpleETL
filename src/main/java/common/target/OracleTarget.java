@@ -33,4 +33,13 @@ public class OracleTarget implements IDataTarget {
         return true;
     }
 
+    @Override
+    public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
+        JdbcOperator operator = new JdbcOperator(connection, software);
+        for (DomainElement doc : docs) {
+            operator.saveOrUpdate(indexName, doc);
+        }
+        operator.commit();
+        return true;
+    }
 }

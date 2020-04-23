@@ -26,12 +26,12 @@ public class HanCoreDIrcTimeGetterMain extends AbstractMain {
     }
 
     @Override
-    protected IDataTarget getDataTarget(Properties properties) {
+    protected IDataTarget dataTarget(Properties properties) {
         return new FileTarget(properties.getProperty("outputTextPath"),"text");
     }
 
     @Override
-    protected IDataSource getDataSource(Properties properties) {
+    protected IDataSource dataSource(Properties properties) {
         return new FileSource(properties.getProperty("hanLpCoreDircPath"));
     }
 }

@@ -67,12 +67,12 @@ public class KgToEsMain2 extends AbstractMain {
 
 
     @Override
-    protected IDataSource getDataSource(Properties properties) {
+    protected IDataSource dataSource(Properties properties) {
         return new FileSource("D:\\data\\KnowledgeGraph\\freebase\\freebase-rdf-latest");
     }
 
     @Override
-    protected IDataTarget getDataTarget(Properties properties) {
+    protected IDataTarget dataTarget(Properties properties) {
         return new ElasticsearchTarget(properties);
     }
 }

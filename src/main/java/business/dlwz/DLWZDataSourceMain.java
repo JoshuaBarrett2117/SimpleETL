@@ -112,13 +112,13 @@ public class DLWZDataSourceMain extends AbstractMain {
     }
 
     @Override
-    public IDataTarget getDataTarget(Properties properties) {
+    public IDataTarget dataTarget(Properties properties) {
         return new ElasticsearchTarget(properties);
         //        return new FileTarget( "C:/Users/joshua/Desktop/文本提取/xzqh.txt", "word");
     }
 
     @Override
-    public IDataSource getDataSource(Properties properties) {
+    public IDataSource dataSource(Properties properties) {
         RdbDataSource rdbDataSource = new RdbDataSource(properties);
         Connection connection = rdbDataSource.getConnection();
         Software software = new Software();

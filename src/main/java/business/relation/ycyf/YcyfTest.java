@@ -36,12 +36,12 @@ public class YcyfTest extends AbstractMain {
     }
 
     @Override
-    protected IDataSource getDataSource(Properties properties) {
+    protected IDataSource dataSource(Properties properties) {
         return new ElasticsearchSource(properties);
     }
 
     @Override
-    protected IDataTarget getDataTarget(Properties properties) {
+    protected IDataTarget dataTarget(Properties properties) {
         return new FileTarget("C:\\Users\\joshua\\Desktop\\文本提取\\依存语法提取.txt", "text");
     }
 }

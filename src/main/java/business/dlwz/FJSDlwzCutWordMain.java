@@ -33,13 +33,13 @@ public class FJSDlwzCutWordMain extends AbstractMain {
 //        }
 
         IDataSource.Exp exp = new IDataSource.Exp(
-                "select DISTINCT ADDRESS AS " + FJSDlwzCutWordMain.key + " from PY_AMAP_LBS_INFO where ADDRESS !='[]'"
+                "select DISTINCT ADDRESS AS " + FJSDlwzCutWordMain.key + " from PY_AMAP_LBS_INFO where ADDRESS !='[]' "
         );
         new FJSDlwzCutWordMain().deal(exp, "DLWZ_FC_TEST");
     }
 
     @Override
-    protected IDataSource getDataSource(Properties properties) {
+    protected IDataSource dataSource(Properties properties) {
         Connection connection = getConnection(properties);
         Software software = getSoftware();
         //输入源
@@ -54,7 +54,7 @@ public class FJSDlwzCutWordMain extends AbstractMain {
     }
 
     @Override
-    protected IDataTarget getDataTarget(Properties properties) {
+    protected IDataTarget dataTarget(Properties properties) {
         Connection connection = getConnection(properties);
         Software software = getSoftware();
         //输入源

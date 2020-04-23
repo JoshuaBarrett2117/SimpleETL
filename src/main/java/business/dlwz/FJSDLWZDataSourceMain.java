@@ -1,14 +1,15 @@
 package business.dlwz;
 
-import common.transer.ConditionDeleteTranser;
-import common.transer.StringDuplicateRemovalTranser;
-import common.transer.StringSplitTranser;
 import com.code.common.dao.model.DomainElement;
 import com.code.common.utils.StringUtils;
 import com.code.metadata.base.softwaredeployment.Software;
 import common.*;
 import common.source.OracleSource;
 import common.target.ElasticsearchTarget;
+import common.target.FileTarget;
+import common.transer.ConditionDeleteTranser;
+import common.transer.StringDuplicateRemovalTranser;
+import common.transer.StringSplitTranser;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,24 +20,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * 福建省地址细拆分
+ *
  * @author by liufei
  * @Description
  * @Date 2020/3/26 10:02
  */
 public class FJSDLWZDataSourceMain extends AbstractMain {
+
+
     /**
-     * 正则集合
+     * 将括号内的提取出来作为一个新词，1个词变成两个词
      */
-    private static final Pattern[] splitPs = new Pattern[]{
-            Pattern.compile("与|、")
-    };
     private static final Pattern khPattern = Pattern.compile("\\(.{0,}\\)");
+
+    /**
+     * 匹配到之后清空匹配到的内容
+     */
     private static final Pattern numberPattern = Pattern.compile("^[0-9]+$");
-    private static final Pattern[] matchPs = new Pattern[]{
-            //去出XXX号 XXX-XXX等数据
-            Pattern.compile("[a-zA-Z]{0,}[0-9]+(-){0,}[0-9]{0,}.+")
-            , Pattern.compile("(等|附近|东|西|南|北|东南|西南|东北|西北|之|交叉口)(?!路).{0,}$")
-    };
+
+
     /**
      * 删除括号内容,然后新增一条括号内容的数据
      */
@@ -61,7 +64,7 @@ public class FJSDLWZDataSourceMain extends AbstractMain {
             Set<String> set = new HashSet<>();
             set.add(content);
             //拆分
-            for (Pattern splitP : splitPs) {
+            for (Pattern splitP : StaticPattern.splitPs) {
                 String[] split = splitP.split(content);
                 if (split.length > 1) {
                     set.addAll(Arrays.asList(split));
@@ -71,20 +74,23 @@ public class FJSDLWZDataSourceMain extends AbstractMain {
         }
     };
 
+    /**
+     * 拆分，过滤
+     */
     private static final StringSplitTranser.Func splitFunc2 = new StringSplitTranser.Func() {
         @Override
         public List<String> split(String content) {
             Set<String> set = new HashSet<>();
             set.add(content);
             //拆分
-            for (Pattern splitP : splitPs) {
+            for (Pattern splitP : StaticPattern.splitPs) {
                 String[] split = splitP.split(content);
                 if (split.length > 1) {
                     set.addAll(Arrays.asList(split));
                 }
             }
             //根据正则过滤掉词之后，生成新词
-            for (Pattern p : matchPs) {
+            for (Pattern p : StaticPattern.matchPs) {
                 Matcher matcher = p.matcher(content);
                 String s = matcher.replaceAll("").trim();
                 if (StringUtils.isNotBlank(s)) {
@@ -94,23 +100,32 @@ public class FJSDLWZDataSourceMain extends AbstractMain {
             return new ArrayList<>(set);
         }
     };
+    /**
+     * 包含分号的删除，过滤比如   105路;108路;118路;134路;305路    这类ADDRESS，这类应该是公交车站
+     */
     private static final ConditionDeleteTranser.Condition condition1 = new ConditionDeleteTranser.Condition() {
         @Override
-        public boolean isFilter(DomainElement domainElement) {
-            String name = domainElement.get("NAME").toString();
+        public boolean isFilter(DomainElement domainElement, String key) {
+            String name = domainElement.get(key).toString();
             if (name.contains(";")) {
                 return true;
             }
             return false;
         }
     };
+
+    /**
+     * 删除长度小于2，或者全数字的词，或者字符/数字开头的词
+     */
     private static final ConditionDeleteTranser.Condition condition2 = new ConditionDeleteTranser.Condition() {
         @Override
-        public boolean isFilter(DomainElement domainElement) {
-            String name = domainElement.get("word").toString();
+        public boolean isFilter(DomainElement domainElement, String key) {
+            String name = domainElement.get(key).toString();
             Matcher matcher = numberPattern.matcher(name);
-            String trim = matcher.replaceAll("").trim();
-            if (name.length() <= 2 || StringUtils.isBlank(trim)) {
+            Matcher matcher1 = StaticPattern.numberMatchPattern.matcher(name);
+            String trim1 = matcher.replaceAll("").trim();
+            String trim2 = matcher1.replaceAll("").trim();
+            if (name.length() <= 2 || StringUtils.isBlank(trim1) || StringUtils.isBlank(trim2)) {
                 return true;
             }
             return false;
@@ -129,31 +144,32 @@ public class FJSDLWZDataSourceMain extends AbstractMain {
             throw new RuntimeException(e);
         }
 
-        IDataSource.Exp exp = new IDataSource.Exp("select DISTINCT ADDRESS AS NAME from PY_AMAP_LBS_INFO where ADDRESS !='[]'");
+        IDataSource.Exp exp = new IDataSource.Exp("select  DISTINCT ADDRESS AS NAME, A.ADCODE,A.NAME AS P_NAME,A.ID from PY_AMAP_LBS_INFO A where ADDRESS !='[]' ");
         new FJSDLWZDataSourceMain().deal(exp, properties.getProperty("es_dict_name"));
+//        new FJSDLWZDataSourceMain().deal(exp, null);
     }
 
     @Override
     protected List<IIteratorTranser> getTransers() {
         return Arrays.asList(
-                new ConditionDeleteTranser(condition1)
+                new ConditionDeleteTranser("NAME", condition1)
                 , new StringSplitTranser("NAME", splitFunc0)
                 , new StringSplitTranser("NAME", splitFunc1)
                 , new StringSplitTranser("NAME", splitFunc2)
-                , new XMDlwzTransIterator()
-                , new ConditionDeleteTranser(condition2)
-                , new StringDuplicateRemovalTranser("word")
+//                , new XMDlwzTransIterator()  //创建词典文档的
+                , new ConditionDeleteTranser("NAME", condition2)
+                , new StringDuplicateRemovalTranser("NAME")
         );
     }
 
     @Override
-    public IDataTarget getDataTarget(Properties properties) {
-        return new ElasticsearchTarget(properties);
-//        return new FileTarget("C:/Users/joshua/Desktop/文本提取/福建省地理位置.txt", "word");
+    public IDataTarget dataTarget(Properties properties) {
+//        return new ElasticsearchTarget(properties);
+        return new FileTarget("C:/Users/joshua/Desktop/文本提取/福建省地理位置3.txt", "NAME");
     }
 
     @Override
-    public IDataSource getDataSource(Properties properties) {
+    public IDataSource dataSource(Properties properties) {
         RdbDataSource rdbDataSource = new RdbDataSource(properties);
         Connection connection = rdbDataSource.getConnection();
         Software software = new Software();

@@ -36,12 +36,12 @@ public class TestMain extends AbstractMain {
     }
 
     @Override
-    protected IDataSource getDataSource(Properties properties) {
+    protected IDataSource dataSource(Properties properties) {
         return new FileSource(properties.getProperty("dict_txt_file"));
     }
 
     @Override
-    protected IDataTarget getDataTarget(Properties properties) {
+    protected IDataTarget dataTarget(Properties properties) {
         return new ElasticsearchTarget(properties);
     }
 
