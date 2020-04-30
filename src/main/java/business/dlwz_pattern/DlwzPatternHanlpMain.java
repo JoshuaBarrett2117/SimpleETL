@@ -29,7 +29,8 @@ public class DlwzPatternHanlpMain extends AbstractMain {
     }
 
     public static void main(String[] args) {
-        new DlwzPatternHanlpMain().deal(new IDataSource.Exp("select address from PY_AMAP_LBS_INFO where address!='[]'"), "DLWZ_PATTERN_GROUP_BY");
+        new DlwzPatternHanlpMain().deal(new IDataSource.Exp("select address from PY_AMAP_LBS_INFO where address!='[]'"),
+                "DLWZ_PATTERN_GROUP_BY2");
     }
 
     @Override
@@ -39,6 +40,7 @@ public class DlwzPatternHanlpMain extends AbstractMain {
                     @Override
                     public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
                         return new Iterator<DomainElement>() {
+
                             @Override
                             public boolean hasNext() {
                                 return iterator.hasNext();

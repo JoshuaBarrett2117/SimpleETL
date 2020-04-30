@@ -36,24 +36,22 @@ public abstract class AbstractPatternChain {
     }
 
     /**
-     * @param id   自身id
      * @param pId  父亲id
      * @param text 要处理的字符串，为空串时不做任何处理，不丢给下个链
      * @return 解析的图
      */
-    public final Graph deal(String id, String pId, String text, String lastText) {
+    public final Graph deal(String pId, String text, String lastText) {
         AbstractPatternChain.Graph graph = new AbstractPatternChain.Graph();
-        return this.deal(id, pId, text, graph, lastText);
+        return this.deal(pId, text, graph, lastText);
     }
 
     /**
-     * @param id    自身id
      * @param pId   父亲id
      * @param text  要处理的字符串，为空串时不做任何处理，不丢给下个链
      * @param graph 图
      * @return 解析的图
      */
-    private final Graph deal(String id, String pId, String text, Graph graph, String lastText) {
+    private final Graph deal(String pId, String text, Graph graph, String lastText) {
         if (StringUtils.isBlank(text)) {
             if (StringUtils.isBlank(lastText)) {
                 return graph;
@@ -65,16 +63,18 @@ public abstract class AbstractPatternChain {
         if (matcher.find()) {
             SplitWord splitWord = matchSplitWord(matcher);
             if (StringUtils.isNotBlank(splitWord.parentn)) {
-                parseGraph(graph, id, pId, splitWord.parentn, type);
-                return getGraph(id, IdUtil.uuid(), splitWord.son, graph, lastText);
+                //创建当前id
+                String thisId = IdUtil.calcVId(pId,splitWord.parentn);
+                parseGraph(graph, thisId, pId, splitWord.parentn, type);
+                return getGraph(thisId, splitWord.son, graph, lastText);
             }
         }
         //当前没有匹配到就丢到下一级去匹配
-        return getGraph(pId, id, text, graph, lastText);
+        return getGraph(pId, text, graph, lastText);
     }
 
-    private Graph getGraph(String id, String uuid, String son, Graph graph, String lastText) {
-        return nextChain == null ? graph : nextChain.deal(uuid, id, son, graph, lastText);
+    private Graph getGraph(String id, String son, Graph graph, String lastText) {
+        return nextChain == null ? graph : nextChain.deal(id, son, graph, lastText);
     }
 
 
@@ -88,8 +88,7 @@ public abstract class AbstractPatternChain {
 
     private void parseGraph(AbstractPatternChain.Graph graph, String thisId, String pId, String name, String type) {
         DomainElement roadV = new DomainElement();
-        roadV.addProperties("source_id", thisId);
-        roadV.setId(MD5.md5(pId + name));
+        roadV.setId(thisId);
         roadV.addProperties("name", name);
         roadV.addProperties("type", type);
         graph.addV(roadV);

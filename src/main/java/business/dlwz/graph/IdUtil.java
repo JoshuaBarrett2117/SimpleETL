@@ -16,6 +16,11 @@ public class IdUtil {
         return MD5.md5(e.get("in_id").toString() + e.get("out_id") + e.get("type"));
     }
 
+    public static String calcVId(String pId, String name) {
+        return MD5.md5(pId + name);
+    }
+
+
     public static String uuid() {
         return UUID.randomUUID().toString().replace("-", "");
     }

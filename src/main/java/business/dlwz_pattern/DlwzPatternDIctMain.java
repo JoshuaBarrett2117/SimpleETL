@@ -8,10 +8,7 @@ import common.source.OracleSource;
 import common.target.FileTarget;
 
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @author liufei
@@ -21,7 +18,7 @@ import java.util.Properties;
 public class DlwzPatternDIctMain extends AbstractMain {
 
     public static void main(String[] args) {
-        IDataSource.Exp exp = new IDataSource.Exp("SELECT NAME,TYPE FROM DLWZ_ROAD_V WHERE TYPE != '详细地址'");
+        IDataSource.Exp exp = new IDataSource.Exp("SELECT NAME,TYPE FROM DLWZ_ROAD_V_2 WHERE TYPE != '详细地址' and TYPE!= '具体地点'");
         new DlwzPatternDIctMain().deal(exp, null);
     }
 
@@ -32,20 +29,59 @@ public class DlwzPatternDIctMain extends AbstractMain {
                     @Override
                     public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
                         return new Iterator<DomainElement>() {
+                            Iterator<DomainElement> iter = iterator;
+                            List<String> list = Arrays.asList(
+                                    "号 号 503676",
+                                    "路 路 268362",
+                                    "米 米 124939",
+                                    "附近 附近 103313",
+                                    "- 杆 91607",
+                                    "与 与 89776",
+                                    "交叉口 交叉口 86524",
+                                    "楼 楼 73720",
+                                    "街 街 56172",
+                                    "层 层 39850",
+                                    "村 村 28697",
+                                    "大道 大道 25952",
+                                    "店面 店面 23976",
+                                    "幢 幢 23276",
+                                    "栋 栋 23032",
+                                    "店 店 21403",
+                                    "城 城 20221",
+                                    "广场 广场 20094",
+                                    "大厦 大厦 18695",
+                                    "里 里 14785 ",
+                                    "道 道 14206");
+
                             @Override
                             public boolean hasNext() {
-                                return iterator.hasNext();
+                                boolean b = iter.hasNext();
+                                if (!b && list != null) {
+                                    List<DomainElement> domainElements = new ArrayList<>();
+                                    for (String s : list) {
+                                        String[] split = s.split("\\s");
+                                        DomainElement de = new DomainElement();
+                                        de.addProperties("NAME", split[0]);
+                                        de.addProperties("TYPE", split[1]);
+                                        de.addProperties("NUM", split[2]);
+                                        domainElements.add(de);
+                                    }
+                                    iter = domainElements.iterator();
+                                    list = null;
+                                }
+                                return iter.hasNext();
                             }
 
                             @Override
                             public DomainElement next() {
-                                DomainElement next = iterator.next();
+                                DomainElement next = iter.next();
                                 String name = next.get("NAME").toString().trim();
                                 if (StringUtils.isBlank(name) || name.contains(" ")) {
                                     return null;
                                 }
                                 String type = next.get("TYPE").toString();
-                                next.addProperties("text", name + " " + type + " " + 3000);
+                                String num = next.get("NUM") == null ? "3000" : next.get("NUM").toString();
+                                next.addProperties("text", name + " " + type + " " + num);
                                 return next;
                             }
                         };

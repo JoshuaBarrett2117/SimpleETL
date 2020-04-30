@@ -2,13 +2,18 @@ package business;
 
 import business.dlwz.FJSDLWZDataSourceMain;
 import com.code.common.dao.model.DomainElement;
+import com.code.metadata.base.softwaredeployment.Software;
 import common.*;
 import common.source.FileSource;
+import common.source.OracleSource;
 import common.target.ElasticsearchTarget;
+import common.target.FileTarget;
+import common.transer.StringDuplicateRemovalTranser;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -32,39 +37,28 @@ public class TestMain extends AbstractMain {
             throw new RuntimeException(e);
         }
 
-        new TestMain().deal(null, properties.getProperty("es_dict_name"));
+        new TestMain().deal(new IDataSource.Exp("SELECT ADDRESS FROM PY_AMAP_LBS_INFO WHERE ADDRESS !='[]' "), null);
     }
 
     @Override
     protected IDataSource dataSource(Properties properties) {
-        return new FileSource(properties.getProperty("dict_txt_file"));
+        RdbDataSource rdbDataSource = new RdbDataSource(properties);
+        Connection connection = rdbDataSource.getConnection();
+        Software software = new Software();
+        software.setCode("oracle");
+        //输入源
+        return new OracleSource(connection, software);
     }
 
     @Override
     protected IDataTarget dataTarget(Properties properties) {
-        return new ElasticsearchTarget(properties);
+        return new FileTarget("C:\\Users\\joshua\\Desktop\\文本提取\\测试流程.txt", "ADDRESS");
     }
 
     @Override
     protected List<IIteratorTranser> getTransers() {
         return Arrays.asList(
-                new IIteratorTranser() {
-                    @Override
-                    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-                        return new Iterator<DomainElement>() {
-                            @Override
-                            public boolean hasNext() {
-                                return iterator.hasNext();
-                            }
-
-                            @Override
-                            public DomainElement next() {
-                                DomainElement next = iterator.next();
-                                return CommonUtil.createDictDoc(next.get("text").toString(), Arrays.asList("I-地理位置-Xiang2Xi4Di4Zhi3"));
-                            }
-                        };
-                    }
-                }
+                new StringDuplicateRemovalTranser("ADDRESS")
         );
     }
 

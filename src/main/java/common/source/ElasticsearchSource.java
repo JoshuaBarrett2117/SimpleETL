@@ -58,6 +58,9 @@ public class ElasticsearchSource implements IDataSource {
         List<DomainElement> result = new ArrayList<>();
         try {
             SearchResult execute = client.execute(builder.build());
+            if(!execute.isSucceeded()){
+                throw new RuntimeException(execute.getErrorMessage());
+            }
             scrollId = execute.getValue("_scroll_id").toString();
             List<SearchResult.Hit<Map, Void>> hits = execute.getHits(Map.class);
             for (SearchResult.Hit<Map, Void> hit : hits) {

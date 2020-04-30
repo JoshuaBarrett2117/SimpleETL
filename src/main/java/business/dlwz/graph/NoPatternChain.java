@@ -9,7 +9,9 @@ import java.util.regex.Pattern;
  * @Date 2020/4/23 10:29
  */
 public class NoPatternChain extends AbstractPatternChain {
+
     private static final Pattern p = Pattern.compile(".+");
+
     public NoPatternChain(String type) {
         super(p, type);
     }

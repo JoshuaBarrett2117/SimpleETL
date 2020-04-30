@@ -65,9 +65,9 @@ public class GraphCreatorMain {
         } finally {
             graphCreatorMain.rdbDataSource.close(graphCreatorMain.rdbDataSource.getConnection(), null, null);
         }
-//        AbstractPatternChain.Graph graph = parseGraph("莲前西路29-101号明发商业广场1层", "thisId", "B0FFJRUPFC", "小吃街");
+//        AbstractPatternChain.Graph graph = parseGraph("莲前西路29-101号明发商业广场1层", "pId", "小吃街");
 //        System.out.println(1);
-
+//
     }
 
     private void deal() {
@@ -83,8 +83,8 @@ public class GraphCreatorMain {
         Software software = getSoftware();
         oracleDataSource = new OracleSource(getConnection(properties), software);
         oracleTarget = new OracleTarget(getConnection(properties), software);
-        createXzqhGraph();
-        System.out.println("行政区划图构建完毕");
+//        createXzqhGraph();
+//        System.out.println("行政区划图构建完毕");
         createFjDlwzGraph();
         System.out.println("地理位置图构建完毕");
     }
@@ -108,11 +108,11 @@ public class GraphCreatorMain {
                 return null;
             }
         }
-        AbstractPatternChain.Graph graph = parseGraph(text, IdUtil.uuid(), pId, lastSonName);
+        AbstractPatternChain.Graph graph = parseGraph(text, pId, lastSonName);
         return graph;
     }
 
-    private static AbstractPatternChain.Graph parseGraph(String text, String id, String pId, String lastSonName) {
+    private static AbstractPatternChain.Graph parseGraph(String text, String pId, String lastSonName) {
         AbstractPatternChain streetPatternChain = new RetainPatternChain(streetPattern, "行政街道规划");
         AbstractPatternChain roadPatternChain = new RetainPatternChain(roadPattern, "路");
         streetPatternChain.setNextChain(roadPatternChain);
@@ -130,7 +130,7 @@ public class GraphCreatorMain {
         }
         AbstractPatternChain last = new NoPatternChain("具体地点");
         previousPatternChain.setNextChain(last);
-        return streetPatternChain.deal(id, pId, text, lastSonName);
+        return streetPatternChain.deal(pId, text, lastSonName);
     }
 
 
@@ -146,7 +146,6 @@ public class GraphCreatorMain {
         //创建点
         DomainElement tempV = new DomainElement();
         tempV.setId(dm);
-        tempV.addProperties("source_id", dm);
         tempV.addProperties("name", mc);
         tempV.addProperties("type", "行政区划" + level);
         graph.addV(tempV);

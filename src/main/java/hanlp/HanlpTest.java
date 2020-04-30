@@ -14,7 +14,17 @@ import java.util.List;
 public class HanlpTest {
     public static void main(String[] args) {
         Segment segment = HanLP.newSegment();
-        List<Term> test = segment.seg("小米和小红去了超市");
+        segment.enableCustomDictionary(true);
+        segment.enablePlaceRecognize(true);
+        segment.enableOrganizationRecognize(true);
+        List<Term> test = segment.seg("福建省厦门市集美区杏林街道杏林村鸡儿路310号巨龙信息科技有限公司");
         System.out.println(test);
+        segment.enableCustomDictionary(true);
+        test = segment.seg("巨龙信息科技有限公司");
+        System.out.println(test);
+        test = segment.seg("网宿科技有限公司");
+        System.out.println(test);
+
+
     }
 }
