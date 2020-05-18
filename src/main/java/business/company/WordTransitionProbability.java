@@ -29,7 +29,7 @@ public class WordTransitionProbability extends AbstractMain {
 
     public static void main(String[] args) {
         IDataSource.Exp sourceSql = new IDataSource.Exp("{\n" +
-                "  \"size\": 5000,\n" +
+                "  \"size\": 10000,\n" +
                 "  \"query\": {\n" +
                 "    \"exists\": {\n" +
                 "      \"field\": \"Gong1Si1Ming2Cheng1\"\n" +
@@ -91,7 +91,7 @@ public class WordTransitionProbability extends AbstractMain {
                                 Map.Entry<String, Double> entry = entryIterator.next();
                                 String k = entry.getKey();
                                 Double b = entry.getValue();
-                                if (b == null || b == 0 || b.isInfinite() || b.isNaN()) {
+                                if (b == null || b.isInfinite() || b.isNaN()) {
                                     return null;
                                 }
                                 DomainElement de = new DomainElement();
@@ -145,9 +145,6 @@ public class WordTransitionProbability extends AbstractMain {
                 total += integer == null ? 0 : integer;
             }
             for (String word : words) {
-                if (word.equals(src)) {
-                    continue;
-                }
                 Integer integer = tempMap.get(src + "," + word);
                 result.put(word, ((double) (integer == null ? 0 : integer)) / total);
             }

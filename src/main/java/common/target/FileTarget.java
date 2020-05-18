@@ -1,6 +1,7 @@
 package common.target;
 
 import com.code.common.dao.model.DomainElement;
+import com.code.common.utils.StringUtils;
 import common.IDataTarget;
 
 import java.io.*;
@@ -14,6 +15,12 @@ import java.util.List;
 public class FileTarget implements IDataTarget {
     private FileOutputStream fileOutputStream;
     private String elementKey;
+    /**
+     * The name of a supported
+     * {@link java.nio.charset.Charset charset}
+     *
+     */
+    private String charsetName;
 
     public FileTarget(FileOutputStream fileOutputStream, String elementKey) {
         this.elementKey = elementKey;
@@ -42,7 +49,7 @@ public class FileTarget implements IDataTarget {
     public boolean save(List<DomainElement> docs, String indexName) {
         BufferedWriter bufferedWriter = null;
         try {
-            bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream, "utf-8"));
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream, StringUtils.isNotBlank(charsetName) ? charsetName : "utf-8"));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -71,5 +78,13 @@ public class FileTarget implements IDataTarget {
     @Override
     public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
         throw new RuntimeException("暂不支持");
+    }
+
+    /**
+     * @param charsetName The name of a supported
+     *                    {@link java.nio.charset.Charset charset}
+     */
+    public void setCharsetName(String charsetName) {
+        this.charsetName = charsetName;
     }
 }

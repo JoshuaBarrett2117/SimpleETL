@@ -1,6 +1,7 @@
 package business;
 
 import business.dlwz.FJSDLWZDataSourceMain;
+import business.v.VAndVnGetMain;
 import com.code.common.dao.model.DomainElement;
 import com.code.metadata.base.softwaredeployment.Software;
 import common.*;
@@ -24,7 +25,7 @@ import java.util.Properties;
  * @Description
  * @Date 2020/4/8 8:51
  */
-public class TestMain extends AbstractMain {
+public class TestMain {
 
     public static void main(String[] args) {
         Properties properties = new Properties();
@@ -37,29 +38,15 @@ public class TestMain extends AbstractMain {
             throw new RuntimeException(e);
         }
 
-        new TestMain().deal(new IDataSource.Exp("SELECT ADDRESS FROM PY_AMAP_LBS_INFO WHERE ADDRESS !='[]' "), null);
-    }
-
-    @Override
-    protected IDataSource dataSource(Properties properties) {
-        RdbDataSource rdbDataSource = new RdbDataSource(properties);
-        Connection connection = rdbDataSource.getConnection();
-        Software software = new Software();
-        software.setCode("oracle");
-        //输入源
-        return new OracleSource(connection, software);
-    }
-
-    @Override
-    protected IDataTarget dataTarget(Properties properties) {
-        return new FileTarget("C:\\Users\\joshua\\Desktop\\文本提取\\测试流程.txt", "ADDRESS");
-    }
-
-    @Override
-    protected List<IIteratorTranser> getTransers() {
-        return Arrays.asList(
-                new StringDuplicateRemovalTranser("ADDRESS")
-        );
+        IDataSource.Exp exp = new IDataSource.Exp("{\n" +
+                "  \"_source\": [\n" +
+                "    \"sentence_text\",\n" +
+                "    \"tag_seq\",\n" +
+                "    \"tag_word_seq\"\n" +
+                "  ]\n" +
+                "}");
+        exp.setTableNames(Arrays.asList(properties.getProperty("es_dict_name")));
+        new VAndVnGetMain().deal(exp, properties.getProperty("oracle_target"));
     }
 
 

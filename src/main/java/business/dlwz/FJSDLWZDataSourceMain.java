@@ -144,7 +144,7 @@ public class FJSDLWZDataSourceMain extends AbstractMain {
             throw new RuntimeException(e);
         }
 
-        IDataSource.Exp exp = new IDataSource.Exp("select  DISTINCT ADDRESS AS NAME, A.ADCODE,A.NAME AS P_NAME,A.ID from PY_AMAP_LBS_INFO A where ADDRESS !='[]' ");
+        IDataSource.Exp exp = new IDataSource.Exp("SELECT concat(pname,concat(cityname,concat(adname,address))) FROM PY_AMAP_LBS_INFO where ADDRESS !='[]' ");
         new FJSDLWZDataSourceMain().deal(exp, properties.getProperty("es_dict_name"));
 //        new FJSDLWZDataSourceMain().deal(exp, null);
     }
