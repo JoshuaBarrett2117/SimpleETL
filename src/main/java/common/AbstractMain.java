@@ -1,7 +1,7 @@
 package common;
 
-import business.dlwz.FJSDLWZDataSourceMain;
-import com.code.common.dao.model.DomainElement;
+import business.algorithm.dlwz.FJSDLWZDataSourceMain;
+import dao.core.model.DomainElement;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,39 +20,7 @@ public abstract class AbstractMain {
     private IDataTarget target;
     private IDataSource source;
 
-    private IIteratorTranser nullDealTranser = new IIteratorTranser() {
-        @Override
-        public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-            return new Iterator<DomainElement>() {
-                boolean isOut = true;
-                DomainElement next;
-
-                @Override
-                public boolean hasNext() {
-                    if (!isOut) {
-                        return true;
-                    }
-                    while (iterator.hasNext()) {
-                        next = iterator.next();
-                        if (next == null) {
-                            continue;
-                        } else {
-                            isOut = false;
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-
-                @Override
-                public DomainElement next() {
-                    isOut = true;
-                    return next;
-                }
-            };
-        }
-    };
-    private static Properties properties;
+    protected static Properties properties;
 
     static {
         properties = new Properties();
@@ -67,37 +35,61 @@ public abstract class AbstractMain {
     }
 
     public void deal(IDataSource.Exp sourceSql, String targetTableName) {
-        Iterator<DomainElement> iterator = dealTranser(sourceSql);
+        Iterator<DomainElement> iterator = warpTranslator(sourceSql);
         if (target != null) {
-            save(target, iterator, targetTableName);
+            start(target, iterator, targetTableName);
         }
     }
 
-    public Iterator<DomainElement> dealTranser(IDataSource.Exp sourceSql) {
-        source = dataSource(properties);
-        target = dataTarget(properties);
+    /**
+     * 包装多个处理器形成迭代器管道
+     *
+     * @param sourceSql 数据源入参表达式
+     * @return 最上层迭代器
+     */
+    public Iterator<DomainElement> warpTranslator(IDataSource.Exp sourceSql) {
+        //构建数据源和目标数据源
+        source = buildDataSource(properties);
+        target = buildDataTarget(properties);
         Iterator<DomainElement> iterator = source.iterator(sourceSql);
-        //转换
-        List<IIteratorTranser> transers = getTransers();
-        if (transers != null) {
-            for (IIteratorTranser transer : transers) {
-                Iterator<DomainElement> nullIterator = nullDealTranser.transIterator(iterator);
-                iterator = transer.transIterator(nullIterator);
+        //获取转换流程
+        List<IIteratorTranslator> translators = getTranslators();
+        if (translators != null) {
+            for (IIteratorTranslator translator : translators) {
+                Iterator<DomainElement> nullIterator = new NullDealTranslator().transIterator(iterator);
+                iterator = translator.transIterator(nullIterator);
             }
         }
         return iterator;
     }
 
+    /**
+     * 构建数据源
+     *
+     * @param properties 配置信息
+     * @return
+     */
+    protected abstract IDataSource buildDataSource(Properties properties);
 
-    protected abstract IDataSource dataSource(Properties properties);
-
-    protected List<IIteratorTranser> getTransers() {
+    /**
+     * 构建转换流程，子类需要重写该方法实现添加子流程
+     *
+     * @return
+     */
+    protected List<IIteratorTranslator> getTranslators() {
         return null;
     }
 
-    protected abstract IDataTarget dataTarget(Properties properties);
+    /**
+     * 构建目标数据
+     *
+     * @param properties 配置信息
+     * @return
+     */
+    protected abstract IDataTarget buildDataTarget(Properties properties);
 
-    private static void save(IDataTarget target, Iterator<DomainElement> iter, String tableName) {
+    //执行流程
+    private static void start(IDataTarget target, Iterator<DomainElement> iter, String tableName) {
         long count = 0;
         long allStart = System.currentTimeMillis();
         long start = allStart;
@@ -129,7 +121,41 @@ public abstract class AbstractMain {
     public IDataTarget getTarget() {
         return target;
     }
+
     public IDataSource getSource() {
         return source;
+    }
+
+    class NullDealTranslator implements IIteratorTranslator {
+        @Override
+        public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
+            return new Iterator<DomainElement>() {
+                boolean isOut = true;
+                DomainElement next;
+
+                @Override
+                public boolean hasNext() {
+                    if (!isOut) {
+                        return true;
+                    }
+                    while (iterator.hasNext()) {
+                        next = iterator.next();
+                        if (next == null) {
+                            continue;
+                        } else {
+                            isOut = false;
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                @Override
+                public DomainElement next() {
+                    isOut = true;
+                    return next;
+                }
+            };
+        }
     }
 }

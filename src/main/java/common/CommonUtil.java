@@ -1,6 +1,6 @@
 package common;
 
-import com.code.common.dao.model.DomainElement;
+import  dao.core.model.DomainElement;
 
 import java.util.*;
 

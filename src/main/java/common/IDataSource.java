@@ -1,6 +1,6 @@
 package common;
 
-import com.code.common.dao.model.DomainElement;
+import dao.core.model.DomainElement;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,6 +13,8 @@ import java.util.List;
  */
 public interface IDataSource {
     Iterator<DomainElement> iterator(Exp sql);
+
+    DomainElement queryForObject(Exp sql);
 
     class Exp {
         public Exp(String exp) {

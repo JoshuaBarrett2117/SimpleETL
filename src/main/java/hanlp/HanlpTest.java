@@ -2,6 +2,7 @@ package hanlp;
 
 import com.hankcs.hanlp.HanLP;
 import com.hankcs.hanlp.corpus.dependency.CoNll.CoNLLSentence;
+import com.hankcs.hanlp.seg.Segment;
 
 /**
  * @author by liufei
@@ -13,7 +14,10 @@ public class HanlpTest {
 
         CoNLLSentence coNLLWords = HanLP.parseDependency("原定2020年现改为2020年，在宜友海鲜大排档（中山路、中山路和中山路口之间）");
         System.out.println(coNLLWords);
-//        segment.enableCustomDictionary(true);
+        Segment segment = HanLP.newSegment();
+        segment.enableOrganizationRecognize(false);
+        segment.enableCustomDictionary(false);
+        segment.enablePlaceRecognize(false);
 //        test = segment.seg("巨龙信息科技有限公司");
 //        System.out.println(test);
 //        test = segment.seg("网宿科技有限公司");

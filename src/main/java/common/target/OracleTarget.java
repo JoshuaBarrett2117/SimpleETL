@@ -1,12 +1,11 @@
 package common.target;
 
-import com.code.common.dao.jdbc.operator.JdbcOperator;
-import com.code.common.dao.model.DomainElement;
-import com.code.metadata.base.softwaredeployment.Software;
+import dao.jdbc.operator.JdbcOperator;
+import  dao.core.model.DomainElement;
+import dao.jdbc.operator.Software;
 import common.IDataTarget;
 
 import java.sql.Connection;
-import java.util.Iterator;
 import java.util.List;
 
 /**

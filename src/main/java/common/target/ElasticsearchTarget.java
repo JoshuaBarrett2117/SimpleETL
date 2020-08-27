@@ -1,8 +1,8 @@
 package common.target;
 
-import com.code.common.dao.model.DomainElement;
 import com.google.gson.GsonBuilder;
 import common.IDataTarget;
+import dao.core.model.DomainElement;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
 import io.searchbox.client.config.HttpClientConfig;
@@ -26,6 +26,10 @@ public class ElasticsearchTarget implements IDataTarget {
         client = getJestClient(properties.getProperty("esIp"), properties.getProperty("esPort"));
     }
 
+    public ElasticsearchTarget(String ip, String port) {
+        client = getJestClient(ip, port);
+    }
+
     private JestClient getJestClient(String ip, String port) {
         JestClientFactory factory = new JestClientFactory();
         factory.setHttpClientConfig(new HttpClientConfig
@@ -43,15 +47,14 @@ public class ElasticsearchTarget implements IDataTarget {
      *
      * @param jestClient
      * @param indexName
-     * @param typeName
      * @param objs
      * @return
      * @throws Exception
      */
-    private boolean index(JestClient jestClient, String indexName, String typeName, List<DomainElement> objs) {
-        Bulk.Builder bulk = new Bulk.Builder().defaultIndex(indexName).defaultType(typeName);
+    private boolean index(JestClient jestClient, String indexName, List<DomainElement> objs) {
+        Bulk.Builder bulk = new Bulk.Builder().defaultIndex(indexName).defaultType("_doc");
         for (DomainElement obj : objs) {
-            Index index = new Index.Builder(obj.getProperties()).build();
+            Index index = new Index.Builder(obj.getProperties()).id(obj.getId()).build();
             bulk.addAction(index);
         }
         bulk.refresh(true);
@@ -71,7 +74,7 @@ public class ElasticsearchTarget implements IDataTarget {
 
     @Override
     public boolean save(List<DomainElement> docs, String indexName) {
-        return index(client, indexName, indexName, docs);
+        return index(client, indexName, docs);
     }
 
     @Override

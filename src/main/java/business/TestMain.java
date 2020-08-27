@@ -1,23 +1,13 @@
 package business;
 
-import business.dlwz.FJSDLWZDataSourceMain;
-import business.v.VAndVnGetMain;
-import com.code.common.dao.model.DomainElement;
-import com.code.metadata.base.softwaredeployment.Software;
+import business.algorithm.dlwz.FJSDLWZDataSourceMain;
+import business.algorithm.v.VAndVnGetMain;
 import common.*;
-import common.source.FileSource;
-import common.source.OracleSource;
-import common.target.ElasticsearchTarget;
-import common.target.FileTarget;
-import common.transer.StringDuplicateRemovalTranser;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.sql.Connection;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 
 /**

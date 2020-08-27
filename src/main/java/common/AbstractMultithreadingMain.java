@@ -1,7 +1,7 @@
 package common;
 
-import business.dlwz.FJSDLWZDataSourceMain;
-import com.code.common.dao.model.DomainElement;
+import business.algorithm.dlwz.FJSDLWZDataSourceMain;
+import  dao.core.model.DomainElement;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,7 +36,7 @@ public abstract class AbstractMultithreadingMain {
 
     private BlockingQueue<DomainElement> queue = new ArrayBlockingQueue<>(5000);
 
-    private IIteratorTranser nullDealTranser = new IIteratorTranser() {
+    private IIteratorTranslator nullDealTranser = new IIteratorTranslator() {
         @Override
         public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
             return new Iterator<DomainElement>() {
@@ -126,10 +126,10 @@ public abstract class AbstractMultithreadingMain {
             //输出
             IDataTarget target = getDataTarget(properties);
             //转换
-            List<IIteratorTranser> transers = getTransers();
+            List<IIteratorTranslator> transers = getTransers();
 
             if (transers != null) {
-                for (IIteratorTranser transer : transers) {
+                for (IIteratorTranslator transer : transers) {
                     Iterator<DomainElement> nullIterator = nullDealTranser.transIterator(iter);
                     iter = transer.transIterator(nullIterator);
                 }
@@ -142,7 +142,7 @@ public abstract class AbstractMultithreadingMain {
 
     protected abstract IDataSource getDataSource(Properties properties);
 
-    protected List<IIteratorTranser> getTransers() {
+    protected List<IIteratorTranslator> getTransers() {
         return null;
     }
 
