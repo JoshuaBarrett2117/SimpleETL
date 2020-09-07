@@ -10,7 +10,7 @@ import java.util.Date;
 public class IncrementUtil {
 
     public static void main(String[] args) {
-        String tableName = "test";
+        String tableName = "pipeline";
         IncrementParam ip = new IncrementParam("ff", new Date(1547049600000L));
         Software software = new Software("postgresql");
         String s = new IncrementUtil().constructIncrementSql("select * from " + tableName + " where 1=1", ip, software);

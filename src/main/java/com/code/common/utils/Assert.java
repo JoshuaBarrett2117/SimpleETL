@@ -365,6 +365,18 @@ public abstract class Assert {
         }
     }
 
+    public static void assertEquals(Object o1, String o2, String message) {
+        if (!o1.equals(o2)) {
+            throw new IllegalStateException(message);
+        }
+    }
+
+    public static void assertEquals(Object o1, String o2) {
+        if (!o1.equals(o2)) {
+            throw new IllegalStateException("必须是相同对象");
+        }
+    }
+
 
     /**
      * 断言一个对象所属状态值是否为true,有默认消息
