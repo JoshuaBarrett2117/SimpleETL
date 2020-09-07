@@ -72,7 +72,7 @@ public class ExcelFileSource implements IDataSource {
     }
 
     @Override
-    public Iterator<DomainElement> iterator(IDataSource.Exp sql) {
+    public Iterator<DomainElement> iterator(Exp sql) {
         Iterator<Integer> indexIterator = this.sheetIndices.iterator();
         if (indexIterator.hasNext()) {
             String[] columnsName = new String[0];

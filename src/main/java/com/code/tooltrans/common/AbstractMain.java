@@ -113,6 +113,8 @@ public abstract class AbstractMain {
         }
         target.save(docs, tableName);
         long cost = System.currentTimeMillis() - allStart;
+        System.out.println("正在关闭target");
+        target.close();
         System.out.println("结束，共" + count + "条数据");
         System.out.println("总耗时[" + cost + "]ms");
         System.out.println("总速度[" + ((double) (count % 5000) / cost * 1000) + "]条/s");

@@ -40,7 +40,7 @@ public class TextFileSource implements IDataSource {
     }
 
     @Override
-    public Iterator<DomainElement> iterator(IDataSource.Exp sql) {
+    public Iterator<DomainElement> iterator(Exp sql) {
         BufferedReader readerSrc = null;
         try {
             readerSrc = new BufferedReader(new InputStreamReader(fileInputStream, "utf-8"));
