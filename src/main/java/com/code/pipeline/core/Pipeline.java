@@ -1,4 +1,4 @@
-package com.code.pipeline;
+package com.code.pipeline.core;
 
 /**
  * 用于组织管道与管道之间的关系

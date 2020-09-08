@@ -1,4 +1,4 @@
-package com.code.pipeline;
+package com.code.pipeline.core;
 
 public class PipeException extends Exception
 {

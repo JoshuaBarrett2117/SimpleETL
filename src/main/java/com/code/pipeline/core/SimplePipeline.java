@@ -1,4 +1,4 @@
-package com.code.pipeline;
+package com.code.pipeline.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +21,12 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
     /**
      * 管道队列
      */
-    private final Queue<Pipe<?, ?>> pipes = new LinkedList<Pipe<?, ?>>();
+    protected final Queue<Pipe<?, ?>> pipes = new LinkedList<Pipe<?, ?>>();
 
     /**
      * 线程池服务
      */
-    private final ExecutorService helperExecutor;
+    protected final ExecutorService helperExecutor;
 
     public SimplePipeline() {
         this(Executors.newSingleThreadExecutor(new ThreadFactory() {

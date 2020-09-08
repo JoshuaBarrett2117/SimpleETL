@@ -1,4 +1,4 @@
-package com.code.pipeline;
+package com.code.pipeline.core;
 
 import java.util.concurrent.TimeUnit;
 

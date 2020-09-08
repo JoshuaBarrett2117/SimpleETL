@@ -1,4 +1,4 @@
-package com.code.pipeline;
+package com.code.pipeline.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
                 } finally {
                     //任务完成后-1
                     remainingReservations = terminationToken.reservations.decrementAndGet();
-                    logger.info("剩余任务数量是：" + remainingReservations);
+//                    logger.info("剩余任务数量是：" + remainingReservations);
                 }
                 if (terminationToken.isToShutdown() && 0 == remainingReservations) {
                     stageProcessDoneLatch.countDown();
@@ -55,7 +55,7 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
 
         executorService.submit(task);
         int i = terminationToken.reservations.incrementAndGet();
-        logger.info("当前任务数量是：" + i);
+//        logger.info("当前任务数量是：" + i);
 
     }
 
