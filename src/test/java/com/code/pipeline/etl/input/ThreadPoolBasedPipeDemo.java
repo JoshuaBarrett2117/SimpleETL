@@ -1,13 +1,13 @@
 package com.code.pipeline.etl.input;
 
-import com.code.pipeline.core.AbstractPipe;
 import com.code.pipeline.core.Pipe;
 import com.code.pipeline.core.PipeException;
+import com.code.pipeline.core.SimplePipeline;
+import com.code.pipeline.etl.transformer.AbstractTransformerPipe;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +22,7 @@ public class ThreadPoolBasedPipeDemo {
          */
         final ThreadPoolExecutor executorService =
                 new ThreadPoolExecutor(1,
-                        1,
+                        Runtime.getRuntime().availableProcessors() * 2,
                         60, TimeUnit.MINUTES,
                         new SynchronousQueue<Runnable>(),
                         (r) -> {
@@ -33,21 +33,38 @@ public class ThreadPoolBasedPipeDemo {
         /*
          * 创建管道线对象
          */
-        final BatchPipeline<String, String> pipeline = new BatchPipeline<String, String>();
+        final SimplePipeline<String, String> pipeline = new SimplePipeline<String, String>();
+        Pipe<Void, String> inputPipe = new AbstractInputPipe<String>() {
+            int count = 10;
+            int ii = 0;
 
+            @Override
+            public boolean hasNext() {
+                return ii++ < count;
+            }
+
+            @Override
+            public String next() {
+                return "Food-" + ii;
+            }
+
+            @Override
+            public void shutdown(long timeout, TimeUnit unit) {
+
+            }
+        };
+        pipeline.addPipe(inputPipe);
         /*
          * 创建第一条管道
          */
-        Pipe<String, String> pipe = new AbstractPipe<String, String>() {
-
+        Pipe<String, String> pipe = new AbstractTransformerPipe<String, String>() {
             @Override
             protected String doProcess(String input) throws PipeException {
                 String result = input + "->[pipe1," + Thread.currentThread().getName() + "]";
-                logger.info("处理数据:[{}]", result);
+                logger.info(result);
                 return result;
             }
         };
-
         /*
          * 将第一条管道加入线程池
          */
@@ -56,16 +73,11 @@ public class ThreadPoolBasedPipeDemo {
         /*
          * 创建第二条
          */
-        pipe = new AbstractPipe<String, String>() {
+        pipe = new AbstractTransformerPipe<String, String>() {
             @Override
             protected String doProcess(String input) throws PipeException {
                 String result = input + "->[pipe2," + Thread.currentThread().getName() + "]";
                 logger.info(result);
-//                try {
-//                    Thread.sleep(new Random().nextInt(200));
-//                } catch (InterruptedException e) {
-//                    ;
-//                }
                 return result;
             }
 
@@ -88,21 +100,7 @@ public class ThreadPoolBasedPipeDemo {
         //管道线初始化
         pipeline.init(pipeline.newDefaultPipelineContext());
         try {
-            pipeline.process(new Iterator<String>() {
-                int count = 500000;
-                int ii = 0;
-
-                @Override
-                public boolean hasNext() {
-                    return ii++ < count;
-                }
-
-                @Override
-                public String next() {
-                    return "Task-" + ii;
-                }
-            });
-
+            pipeline.process(null);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

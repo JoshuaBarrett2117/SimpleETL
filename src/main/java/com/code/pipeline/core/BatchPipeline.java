@@ -1,7 +1,4 @@
-package com.code.pipeline.etl.input;
-
-import com.code.pipeline.core.Pipe;
-import com.code.pipeline.core.SimplePipeline;
+package com.code.pipeline.core;
 
 import java.util.Iterator;
 

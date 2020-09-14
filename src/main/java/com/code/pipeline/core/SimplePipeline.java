@@ -47,24 +47,12 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
     @Override
     public void shutdown(long timeout, TimeUnit unit) {
         Pipe<?, ?> pipe;
+        logger.info("开始关闭管道");
         //从队列中一个个移除管道并关闭管道
         while (null != (pipe = pipes.poll())) {
             pipe.shutdown(timeout, unit);
         }
         helperExecutor.shutdown();
-    }
-
-    /**
-     * 继承自Pipe的方法，每个管道线也是一个管道，当前管道没有要执行的逻辑，放空
-     *
-     * @param input 输入元素（任务）
-     * @return
-     * @throws PipeException
-     */
-    @Override
-    protected OUT doProcess(T input) throws PipeException {
-        // 什么也不做
-        return null;
     }
 
     @Override
