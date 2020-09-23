@@ -1,7 +1,7 @@
 package com.code.tooltrans.common;
 
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 
 import java.util.Iterator;
 
@@ -11,5 +11,5 @@ import java.util.Iterator;
  * @Date 2020/3/26 15:20
  */
 public interface IIteratorTranslator {
-    Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator);
+    Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator);
 }

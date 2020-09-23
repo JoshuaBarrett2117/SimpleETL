@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.target.excel;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IDataTarget;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -61,7 +61,7 @@ public class ExcelTarget implements IDataTarget {
     }
 
     @Override
-    public boolean save(List<DomainElement> docs, String indexName) {
+    public boolean save(List<DataRowModel> docs, String indexName) {
         if (!isOutHead) {
             synchronized (isOutHead) {
                 if (!isOutHead) {
@@ -83,13 +83,13 @@ public class ExcelTarget implements IDataTarget {
         return true;
     }
 
-    private void createRow(List<DomainElement> docs) {
+    private void createRow(List<DataRowModel> docs) {
         for (int rowNum = 0; rowNum < docs.size(); rowNum++) {
-            DomainElement domainElement = docs.get(rowNum);
+            DataRowModel dataRowModel = docs.get(rowNum);
             Row row = sh.createRow((int) this.rowNum.get());
             for (int cellNum = 0; cellNum < columns.size(); cellNum++) {
                 Cell cell = row.createCell(cellNum);
-                Object o = domainElement.get(columns.get(cellNum));
+                Object o = dataRowModel.get(columns.get(cellNum));
                 cell.setCellValue(o == null ? "" : o.toString());
             }
             sh.getRow(rowNum);
@@ -109,7 +109,7 @@ public class ExcelTarget implements IDataTarget {
     }
 
     @Override
-    public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
+    public boolean saveOrUpdate(List<DataRowModel> docs, String indexName) {
         throw new RuntimeException("暂不支持");
     }
 }

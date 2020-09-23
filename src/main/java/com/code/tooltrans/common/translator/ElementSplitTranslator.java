@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.translator;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IIteratorTranslator;
 
 import java.util.*;
@@ -17,10 +17,10 @@ public class ElementSplitTranslator implements IIteratorTranslator {
     public ElementSplitTranslator(Func... funcs) {
         this.func = new Func() {
             @Override
-            public List<DomainElement> split(DomainElement content) {
-                Set<DomainElement> result = new HashSet<>();
+            public List<DataRowModel> split(DataRowModel content) {
+                Set<DataRowModel> result = new HashSet<>();
                 for (Func func1 : funcs) {
-                    List<DomainElement> split = func1.split(content);
+                    List<DataRowModel> split = func1.split(content);
                     if (split != null) {
                         result.addAll(split);
                     }
@@ -31,10 +31,10 @@ public class ElementSplitTranslator implements IIteratorTranslator {
     }
 
     @Override
-    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-        return new Iterator<DomainElement>() {
+    public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
+        return new Iterator<DataRowModel>() {
 
-            Iterator<DomainElement> temps = Collections.EMPTY_LIST.iterator();
+            Iterator<DataRowModel> temps = Collections.EMPTY_LIST.iterator();
 
             @Override
             public boolean hasNext() {
@@ -46,11 +46,11 @@ public class ElementSplitTranslator implements IIteratorTranslator {
             }
 
             @Override
-            public DomainElement next() {
+            public DataRowModel next() {
                 if (!temps.hasNext()) {
                     if (iterator.hasNext()) {
-                        DomainElement next = iterator.next();
-                        List<DomainElement> words = func.split(next);
+                        DataRowModel next = iterator.next();
+                        List<DataRowModel> words = func.split(next);
                         temps = words.iterator();
                     }
                 }
@@ -63,7 +63,7 @@ public class ElementSplitTranslator implements IIteratorTranslator {
     }
 
     public interface Func {
-        List<DomainElement> split(DomainElement content);
+        List<DataRowModel> split(DataRowModel content);
     }
 
 

@@ -1,8 +1,9 @@
 package com.code.pipeline.etl.output;
 
 import com.alibaba.fastjson.JSONObject;
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -15,12 +16,18 @@ import java.util.concurrent.TimeUnit;
  *
  * @author liufei
  */
-public class ConsoleOutputPipe extends AbstractOutPipe<DomainElement> {
+public class ConsoleOutputPipe extends AbstractOutPipe {
+    public ConsoleOutputPipe(String outputTable) {
+        super(outputTable);
+    }
 
     @Override
-    public void out(DomainElement out) {
-        System.out.println("indexName: " + "【" + JSONObject.toJSONString(out) + "】");
+    public void out(List<DataRowModel> out) {
+        for (DataRowModel dataRowModel : out) {
+            System.out.println("indexName: " + "【" + JSONObject.toJSONString(dataRowModel) + "】");
+        }
     }
+
 
     @Override
     public void shutdown(long timeout, TimeUnit unit) {

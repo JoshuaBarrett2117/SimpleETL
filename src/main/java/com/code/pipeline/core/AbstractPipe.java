@@ -27,4 +27,15 @@ public abstract class AbstractPipe<IN, OUT> implements Pipe<IN, OUT> {
         // 什么也不做
     }
 
+    @Override
+    public void over() throws InterruptedException {
+        this.last();
+        if (this.nextPipe != null) {
+            this.nextPipe.over();
+        }
+    }
+
+    protected abstract void last();
+
+
 }

@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.target.text;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.utils.StringUtils;
 import com.code.tooltrans.common.IDataTarget;
 
@@ -58,7 +58,7 @@ public class CsvTarget implements IDataTarget {
     }
 
     @Override
-    public boolean save(List<DomainElement> docs, String indexName) {
+    public boolean save(List<DataRowModel> docs, String indexName) {
         BufferedWriter bufferedWriter = null;
         try {
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream, StringUtils.isNotBlank(charsetName) ? charsetName : "utf-8"));
@@ -92,9 +92,9 @@ public class CsvTarget implements IDataTarget {
         return true;
     }
 
-    private void createRow(List<DomainElement> docs, BufferedWriter bufferedWriter) throws IOException {
+    private void createRow(List<DataRowModel> docs, BufferedWriter bufferedWriter) throws IOException {
         for (int i = 0; i < docs.size(); i++) {
-            DomainElement doc = docs.get(i);
+            DataRowModel doc = docs.get(i);
             for (int j = 0; j < columns.size(); j++) {
                 String column = columns.get(j);
                 Object o = doc.get(column);
@@ -108,7 +108,7 @@ public class CsvTarget implements IDataTarget {
     }
 
     @Override
-    public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
+    public boolean saveOrUpdate(List<DataRowModel> docs, String indexName) {
         throw new RuntimeException("暂不支持");
     }
 

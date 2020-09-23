@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.source.excel;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IDataSource;
 
 import java.io.File;
@@ -67,12 +67,12 @@ public class ExcelFileSource implements IDataSource {
     }
 
     @Override
-    public DomainElement queryForObject(Exp sql) {
+    public DataRowModel queryForObject(Exp sql) {
         return null;
     }
 
     @Override
-    public Iterator<DomainElement> iterator(Exp sql) {
+    public Iterator<DataRowModel> iterator(Exp sql) {
         Iterator<Integer> indexIterator = this.sheetIndices.iterator();
         if (indexIterator.hasNext()) {
             String[] columnsName = new String[0];
@@ -88,7 +88,7 @@ public class ExcelFileSource implements IDataSource {
 
     }
 
-    class ResultIterator implements Iterator<DomainElement> {
+    class ResultIterator implements Iterator<DataRowModel> {
         Iterator<Integer> indexIterator;
         Iterator<String[]> dataIterator;
         String[] columnsName;
@@ -113,7 +113,7 @@ public class ExcelFileSource implements IDataSource {
         }
 
         @Override
-        public DomainElement next() {
+        public DataRowModel next() {
             String[] next;
             if (dataIterator.hasNext()) {
                 next = dataIterator.next();
@@ -123,7 +123,7 @@ public class ExcelFileSource implements IDataSource {
                 dataIterator = datas.iterator();
                 next = dataIterator.next();
             }
-            DomainElement d = new DomainElement();
+            DataRowModel d = new DataRowModel();
             for (int i = 0; i < next.length; i++) {
                 if (whereNames != null && whereNames.size() > 0) {
                     if (whereNames.contains(columnsName[i])) {

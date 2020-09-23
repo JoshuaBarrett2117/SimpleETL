@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.source.rdb;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.jdbc.operator.JdbcOperator;
 import com.code.common.dao.jdbc.operator.Software;
 import com.code.tooltrans.common.IDataSource;
@@ -23,12 +23,12 @@ public class RdbSource implements IDataSource {
     }
 
     @Override
-    public DomainElement queryForObject(Exp sql) {
+    public DataRowModel queryForObject(Exp sql) {
         return null;
     }
 
     @Override
-    public Iterator<DomainElement> iterator(Exp sql) {
+    public Iterator<DataRowModel> iterator(Exp sql) {
         JdbcOperator operator = new JdbcOperator(connection, software);
         return operator.queryForIterator(sql.getExp(), null);
     }

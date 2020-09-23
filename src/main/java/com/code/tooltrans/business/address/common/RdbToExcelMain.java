@@ -1,6 +1,6 @@
 package com.code.tooltrans.business.address.common;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.jdbc.operator.Software;
 import com.code.tooltrans.common.*;
 import com.code.tooltrans.common.source.rdb.RdbSource;
@@ -45,15 +45,15 @@ public class RdbToExcelMain extends AbstractMain {
     protected List<IIteratorTranslator> getTranslators() {
         return Arrays.asList(new IIteratorTranslator() {
             @Override
-            public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-                return new Iterator<DomainElement>() {
+            public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
+                return new Iterator<DataRowModel>() {
                     @Override
                     public boolean hasNext() {
                         return iterator.hasNext();
                     }
 
                     @Override
-                    public DomainElement next() {
+                    public DataRowModel next() {
                         return iterator.next();
                     }
                 };

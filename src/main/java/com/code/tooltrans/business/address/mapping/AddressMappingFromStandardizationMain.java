@@ -1,6 +1,6 @@
 package com.code.tooltrans.business.address.mapping;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.AbstractMain;
 import com.code.tooltrans.common.IDataSource;
 import com.code.tooltrans.common.IDataTarget;
@@ -46,7 +46,7 @@ public class AddressMappingFromStandardizationMain extends AbstractMain {
         return Arrays.asList(
                 new IIteratorTranslator() {
                     @Override
-                    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
+                    public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
                         IDataSource esSource = new ElasticsearchSource("192.168.125.5", "9400");
                         return new QueryEsIterator(iterator, esSource);
                     }
@@ -54,11 +54,11 @@ public class AddressMappingFromStandardizationMain extends AbstractMain {
         );
     }
 
-    class QueryEsIterator implements Iterator<DomainElement> {
-        private Iterator<DomainElement> iterator;
+    class QueryEsIterator implements Iterator<DataRowModel> {
+        private Iterator<DataRowModel> iterator;
         private IDataSource esSource;
 
-        public QueryEsIterator(Iterator<DomainElement> iterator, IDataSource esSource) {
+        public QueryEsIterator(Iterator<DataRowModel> iterator, IDataSource esSource) {
             this.iterator = iterator;
             this.esSource = esSource;
         }
@@ -69,8 +69,8 @@ public class AddressMappingFromStandardizationMain extends AbstractMain {
         }
 
         @Override
-        public DomainElement next() {
-            DomainElement next = iterator.next();
+        public DataRowModel next() {
+            DataRowModel next = iterator.next();
             Object address = next.get("STANDARD");
             if (address == null) {
                 return null;
@@ -89,11 +89,11 @@ public class AddressMappingFromStandardizationMain extends AbstractMain {
                         "  }\n" +
                         "}");
                 sql.addTableName("t_rh_wz_dx_dtdlwz_di");
-                DomainElement domainElement = esSource.queryForObject(sql);
-                if (domainElement != null) {
-                    domainElement.addProperties("text", s + "," + domainElement.get("bzdm") );
+                DataRowModel dataRowModel = esSource.queryForObject(sql);
+                if (dataRowModel != null) {
+                    dataRowModel.addProperties("text", s + "," + dataRowModel.get("bzdm") );
                 }
-                return domainElement;
+                return dataRowModel;
             }
         }
     }

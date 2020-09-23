@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.target.elasticsearch;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IDataTarget;
 import com.google.gson.GsonBuilder;
 import io.searchbox.client.JestClient;
@@ -51,9 +51,9 @@ public class ElasticsearchTarget implements IDataTarget {
      * @return
      * @throws Exception
      */
-    private boolean index(JestClient jestClient, String indexName, List<DomainElement> objs) {
+    private boolean index(JestClient jestClient, String indexName, List<DataRowModel> objs) {
         Bulk.Builder bulk = new Bulk.Builder().defaultIndex(indexName).defaultType("_doc");
-        for (DomainElement obj : objs) {
+        for (DataRowModel obj : objs) {
             Index index = new Index.Builder(obj.getProperties()).id(obj.getId()).build();
             bulk.addAction(index);
         }
@@ -73,12 +73,12 @@ public class ElasticsearchTarget implements IDataTarget {
     }
 
     @Override
-    public boolean save(List<DomainElement> docs, String indexName) {
+    public boolean save(List<DataRowModel> docs, String indexName) {
         return index(client, indexName, docs);
     }
 
     @Override
-    public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
+    public boolean saveOrUpdate(List<DataRowModel> docs, String indexName) {
         throw new RuntimeException("暂不支持");
     }
 

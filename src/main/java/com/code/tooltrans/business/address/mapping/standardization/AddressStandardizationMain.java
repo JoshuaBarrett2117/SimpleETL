@@ -1,6 +1,6 @@
 package com.code.tooltrans.business.address.mapping.standardization;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IDataTarget;
 import com.code.tooltrans.common.IIteratorTranslator;
 import com.code.tooltrans.common.target.text.TextFileTarget;
@@ -32,16 +32,16 @@ public class AddressStandardizationMain extends AddressStandardizationTrans {
     protected IIteratorTranslator lastStandardizationTrans() {
         return new IIteratorTranslator() {
             @Override
-            public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-                return new Iterator<DomainElement>() {
+            public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
+                return new Iterator<DataRowModel>() {
                     @Override
                     public boolean hasNext() {
                         return iterator.hasNext();
                     }
 
                     @Override
-                    public DomainElement next() {
-                        DomainElement next = iterator.next();
+                    public DataRowModel next() {
+                        DataRowModel next = iterator.next();
                         next.addProperties("text", "" + next.get("ID") + "," + next.get("SRC") + "," + next.get("STANDARD"));
                         return next;
                     }

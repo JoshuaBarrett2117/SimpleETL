@@ -2,7 +2,7 @@ package com.code.common.dao.jdbc.operator;
 
 
 import com.code.common.dao.core.condition.NestedCondition;
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.core.model.PageInfo;
 import com.code.common.dao.core.param.ExpParam;
 import com.code.common.dao.core.type.TypeTransformer;
@@ -46,7 +46,7 @@ public class JdbcOperator {
         this.software = software;
     }
 
-    public void delete(String tableName, DomainElement object) {
+    public void delete(String tableName, DataRowModel object) {
         StringBuffer sql = new StringBuffer("delete from " + tableName + " ");
         StringBuffer whereBuffer = new StringBuffer();
         Map<String, Object> properties = object.getProperties();
@@ -90,7 +90,7 @@ public class JdbcOperator {
     }
 
 
-    public void update(String tableName, DomainElement object) {
+    public void update(String tableName, DataRowModel object) {
         if (StringUtils.isBlank(object.getId())) {
             throw new IllegalArgumentException("id不允许为空");
         }
@@ -105,7 +105,7 @@ public class JdbcOperator {
         executeExp(sql.toString(), null);
     }
 
-    public void save(String tableName, DomainElement object) {
+    public void save(String tableName, DataRowModel object) {
         StringBuffer sql = new StringBuffer("insert into " + tableName + "(");
         Map<String, Object> properties = object.getProperties();
         Set<String> keys = properties.keySet();
@@ -132,7 +132,7 @@ public class JdbcOperator {
         }
     }
 
-    public void saveOrUpdate(String tableName, DomainElement object) {
+    public void saveOrUpdate(String tableName, DataRowModel object) {
         String sql = SaveOrUpdateCreater.create(tableName, object, software);
         ExpParam param = new ExpParam();
         param.addParam("ID", object.getId());
@@ -280,7 +280,7 @@ public class JdbcOperator {
         return sql;
     }
 
-    public Iterator<DomainElement> queryForIterator(String sql, NestedCondition condition) {
+    public Iterator<DataRowModel> queryForIterator(String sql, NestedCondition condition) {
         sql = preprocessSql(sql, condition, null);
         try {
             executeQuery(sql, SCROLL_FETCH_SIZE);
@@ -290,7 +290,7 @@ public class JdbcOperator {
             end();
             throw new RuntimeException("执行sql出错", e);
         }
-        return new Iterator<DomainElement>() {
+        return new Iterator<DataRowModel>() {
             private boolean isNext = true;
 
             @Override
@@ -314,28 +314,28 @@ public class JdbcOperator {
             }
 
             @Override
-            public DomainElement next() {
-                DomainElement domainElement;
+            public DataRowModel next() {
+                DataRowModel dataRowModel;
                 try {
-                    domainElement = getResValue(columnMetas, res);
+                    dataRowModel = getResValue(columnMetas, res);
                 } catch (SQLException e) {
                     end();
                     throw new RuntimeException("解析数据集异常", e);
                 }
                 isNext = true;
-                return domainElement;
+                return dataRowModel;
             }
         };
     }
 
-    public List<DomainElement> queryForList(String sql, NestedCondition condition) {
-        List<DomainElement> resultList = new ArrayList<>();
+    public List<DataRowModel> queryForList(String sql, NestedCondition condition) {
+        List<DataRowModel> resultList = new ArrayList<>();
         sql = preprocessSql(sql, condition, null);
         try {
             executeQuery(sql, LIST_MAX_SIZE);
             while (res.next()) {
-                DomainElement domainElement = getResValue(columnMetas, res);
-                resultList.add(domainElement);
+                DataRowModel dataRowModel = getResValue(columnMetas, res);
+                resultList.add(dataRowModel);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -347,13 +347,13 @@ public class JdbcOperator {
         return resultList;
     }
 
-    public DomainElement queryForObject(String sql, NestedCondition condition) {
-        DomainElement domainElement = null;
+    public DataRowModel queryForObject(String sql, NestedCondition condition) {
+        DataRowModel dataRowModel = null;
         sql = preprocessSql(sql, condition, null);
         try {
             executeQuery(sql, 1);
             if (res.next()) {
-                domainElement = getResValue(columnMetas, res);
+                dataRowModel = getResValue(columnMetas, res);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -362,19 +362,19 @@ public class JdbcOperator {
         } finally {
             end();
         }
-        return domainElement;
+        return dataRowModel;
     }
 
     public PageInfo queryForPage(String sql, NestedCondition condition, PageInfo pageInfo) {
         PageInfo resultPage = new PageInfo();
-        List<DomainElement> domainElements = new ArrayList<>();
-        resultPage.setDataList(domainElements);
+        List<DataRowModel> dataRowModels = new ArrayList<>();
+        resultPage.setDataList(dataRowModels);
         sql = preprocessSql(sql, condition, pageInfo);
         try {
             executeQuery(sql, pageInfo.getPageSize());
             while (res.next()) {
-                DomainElement domainElement = getResValue(columnMetas, res);
-                domainElements.add(domainElement);
+                DataRowModel dataRowModel = getResValue(columnMetas, res);
+                dataRowModels.add(dataRowModel);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -389,8 +389,8 @@ public class JdbcOperator {
         if (!sql.toUpperCase().contains("COUNT(")) {
             sql = "SELECT COUNT(1) AS COUNT FROM (" + sql + ")";
         }
-        DomainElement domainElement = queryForObject(sql, null);
-        long count = ((Number) domainElement.get("COUNT")).longValue();
+        DataRowModel dataRowModel = queryForObject(sql, null);
+        long count = ((Number) dataRowModel.get("COUNT")).longValue();
         return count;
     }
 
@@ -506,12 +506,12 @@ public class JdbcOperator {
     }
 
 
-    private DomainElement getResValue(Map<Integer, ColumnMeta> columnMetas, ResultSet res) throws SQLException {
-        DomainElement domainElement = new DomainElement();
+    private DataRowModel getResValue(Map<Integer, ColumnMeta> columnMetas, ResultSet res) throws SQLException {
+        DataRowModel dataRowModel = new DataRowModel();
         for (ColumnMeta columnMeta : columnMetas.values()) {
-            domainElement.addProperties(columnMeta.getColumnName(), TypeTransformer.transform(res.getObject(columnMeta.getColumnName())));
+            dataRowModel.addProperties(columnMeta.getColumnName(), TypeTransformer.transform(res.getObject(columnMeta.getColumnName())));
         }
-        return domainElement;
+        return dataRowModel;
     }
 
 }

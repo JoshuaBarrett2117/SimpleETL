@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.source.elasticsearch;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IDataSource;
 import com.google.gson.*;
 import io.searchbox.client.JestClient;
@@ -47,7 +47,7 @@ public class ElasticsearchSource implements IDataSource {
     }
 
     @Override
-    public DomainElement queryForObject(Exp sql) {
+    public DataRowModel queryForObject(Exp sql) {
         Search.Builder builder = new Search.Builder(sql.getExp());
         builder.addIndices(sql.getTableNames());
         try {
@@ -66,13 +66,13 @@ public class ElasticsearchSource implements IDataSource {
     }
 
     @Override
-    public Iterator<DomainElement> iterator(Exp sql) {
+    public Iterator<DataRowModel> iterator(Exp sql) {
         Search.Builder builder = new Search.Builder(sql.getExp());
         builder.setParameter("scroll", TIME);
         builder.addIndices(sql.getTableNames());
         String scrollId;
 
-        List<DomainElement> result = new ArrayList<>();
+        List<DataRowModel> result = new ArrayList<>();
         try {
             SearchResult execute = client.execute(builder.build());
             if (!execute.isSucceeded()) {
@@ -81,14 +81,14 @@ public class ElasticsearchSource implements IDataSource {
             scrollId = execute.getValue("_scroll_id").toString();
             List<SearchResult.Hit<Map, Void>> hits = execute.getHits(Map.class);
             for (SearchResult.Hit<Map, Void> hit : hits) {
-                DomainElement domainElement = wrapDomainElement(hit);
-                result.add(domainElement);
+                DataRowModel dataRowModel = wrapDomainElement(hit);
+                result.add(dataRowModel);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return new Iterator<DomainElement>() {
-            Iterator<DomainElement> tempIterator = result.iterator();
+        return new Iterator<DataRowModel>() {
+            Iterator<DataRowModel> tempIterator = result.iterator();
             String scroll_id = scrollId;
 
             @Override
@@ -97,7 +97,7 @@ public class ElasticsearchSource implements IDataSource {
                     return true;
                 } else if (this.scroll_id != null) {
                     try {
-                        List<DomainElement> result = nextResource();
+                        List<DataRowModel> result = nextResource();
                         if (result.size() > 0) {
                             tempIterator = result.iterator();
                             return true;
@@ -115,8 +115,8 @@ public class ElasticsearchSource implements IDataSource {
             }
 
             @NotNull
-            private List<DomainElement> nextResource() throws IOException {
-                List<DomainElement> result = new ArrayList<>();
+            private List<DataRowModel> nextResource() throws IOException {
+                List<DataRowModel> result = new ArrayList<>();
                 SearchScroll.Builder scroll = new SearchScroll.Builder(scroll_id, TIME);
                 JestResult execute = client.execute(scroll.build());
                 JsonObject jsonObject = execute.getJsonObject();
@@ -127,19 +127,19 @@ public class ElasticsearchSource implements IDataSource {
                 this.scroll_id = scroll_id.getAsString();
                 JsonArray hits = jsonObject.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
                 for (JsonElement hit : hits) {
-                    DomainElement domainElement = new DomainElement();
-                    domainElement.setId(hit.getAsJsonObject().getAsJsonPrimitive("_id").getAsString());
-                    domainElement.setType(hit.getAsJsonObject().getAsJsonPrimitive("_type").getAsString());
+                    DataRowModel dataRowModel = new DataRowModel();
+                    dataRowModel.setId(hit.getAsJsonObject().getAsJsonPrimitive("_id").getAsString());
+                    dataRowModel.setType(hit.getAsJsonObject().getAsJsonPrimitive("_type").getAsString());
                     JsonObject source = hit.getAsJsonObject().getAsJsonObject("_source");
                     Map<String, Object> map = gson.fromJson(source.toString(), Map.class);
-                    domainElement.setProperties(map);
-                    result.add(domainElement);
+                    dataRowModel.setProperties(map);
+                    result.add(dataRowModel);
                 }
                 return result;
             }
 
             @Override
-            public DomainElement next() {
+            public DataRowModel next() {
                 return tempIterator.next();
             }
 
@@ -157,12 +157,12 @@ public class ElasticsearchSource implements IDataSource {
     }
 
     @NotNull
-    private DomainElement wrapDomainElement(SearchResult.Hit<Map, Void> hit) {
-        DomainElement domainElement = new DomainElement();
-        domainElement.setId(hit.id);
-        domainElement.setType(hit.type);
-        domainElement.setScore(hit.score);
-        domainElement.setProperties(hit.source);
-        return domainElement;
+    private DataRowModel wrapDomainElement(SearchResult.Hit<Map, Void> hit) {
+        DataRowModel dataRowModel = new DataRowModel();
+        dataRowModel.setId(hit.id);
+        dataRowModel.setType(hit.type);
+        dataRowModel.setScore(hit.score);
+        dataRowModel.setProperties(hit.source);
+        return dataRowModel;
     }
 }

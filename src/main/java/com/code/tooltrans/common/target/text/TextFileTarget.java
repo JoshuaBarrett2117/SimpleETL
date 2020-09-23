@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.target.text;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.utils.StringUtils;
 import com.code.tooltrans.common.IDataTarget;
 
@@ -45,7 +45,7 @@ public class TextFileTarget implements IDataTarget {
     }
 
     @Override
-    public boolean save(List<DomainElement> docs, String indexName) {
+    public boolean save(List<DataRowModel> docs, String indexName) {
         BufferedWriter bufferedWriter = null;
         try {
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream, StringUtils.isNotBlank(charsetName) ? charsetName : "utf-8"));
@@ -53,7 +53,7 @@ public class TextFileTarget implements IDataTarget {
             throw new RuntimeException(e);
         }
         for (int i = 0; i < docs.size(); i++) {
-            DomainElement doc = docs.get(i);
+            DataRowModel doc = docs.get(i);
             try {
                 bufferedWriter.write(doc.get(elementKey).toString());
                 bufferedWriter.write("\r\n");
@@ -75,7 +75,7 @@ public class TextFileTarget implements IDataTarget {
     }
 
     @Override
-    public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
+    public boolean saveOrUpdate(List<DataRowModel> docs, String indexName) {
         throw new RuntimeException("暂不支持");
     }
 

@@ -1,6 +1,9 @@
 package com.code.pipeline.etl.output;
 
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.pipeline.core.Pipe;
+
+import java.util.List;
 
 /**
  * 文件名称: IOutputPipe.java
@@ -12,13 +15,13 @@ import com.code.pipeline.core.Pipe;
  *
  * @author liufei
  */
-public interface IOutputPipe<IN> extends Pipe<IN, Void> {
+public interface IOutputPipe extends Pipe<DataRowModel, Void> {
 
     /**
      * 输出
      *
      * @return
      */
-    void out(IN out);
+    void out(List<DataRowModel> out);
 
 }

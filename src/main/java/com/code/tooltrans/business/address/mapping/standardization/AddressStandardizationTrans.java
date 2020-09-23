@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  * @Description
  * @Date 2020/5/9 14:07
  */
-public abstract class AddressStandardizationTrans extends AbstractMain {
+public abstract class  AddressStandardizationTrans extends AbstractMain {
     private static final Pattern p1 = Pattern.compile("([A-Za-z0-9]+)(-*)([0-9]*)(号|米|门|楼|座|栋|区|层|排).*");
     /**
      * A-2，201-5之类的

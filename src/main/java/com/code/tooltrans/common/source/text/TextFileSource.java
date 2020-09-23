@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.source.text;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IDataSource;
 
 import java.io.*;
@@ -35,12 +35,12 @@ public class TextFileSource implements IDataSource {
     }
 
     @Override
-    public DomainElement queryForObject(Exp sql) {
+    public DataRowModel queryForObject(Exp sql) {
         return null;
     }
 
     @Override
-    public Iterator<DomainElement> iterator(Exp sql) {
+    public Iterator<DataRowModel> iterator(Exp sql) {
         BufferedReader readerSrc = null;
         try {
             readerSrc = new BufferedReader(new InputStreamReader(fileInputStream, "utf-8"));
@@ -48,7 +48,7 @@ public class TextFileSource implements IDataSource {
             throw new RuntimeException(e);
         }
         BufferedReader reader = readerSrc;
-        return new Iterator<DomainElement>() {
+        return new Iterator<DataRowModel>() {
             String s;
             boolean isOut = true;
 
@@ -76,11 +76,11 @@ public class TextFileSource implements IDataSource {
             }
 
             @Override
-            public DomainElement next() {
-                DomainElement domainElement = new DomainElement();
-                domainElement.addProperties("text", s);
+            public DataRowModel next() {
+                DataRowModel dataRowModel = new DataRowModel();
+                dataRowModel.addProperties("text", s);
                 isOut = true;
-                return domainElement;
+                return dataRowModel;
             }
         };
     }

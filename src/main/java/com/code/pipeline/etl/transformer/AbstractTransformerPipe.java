@@ -1,16 +1,14 @@
 package com.code.pipeline.etl.transformer;
 
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.pipeline.core.AbstractPipe;
 import com.code.pipeline.core.Pipe;
 import com.code.pipeline.core.PipeException;
 
 /**
  * 转换管道的抽象类
- *
- * @param <IN>
- * @param <OUT>
  */
-public abstract class AbstractTransformerPipe<IN, OUT> extends AbstractPipe<IN, OUT> {
+public abstract class AbstractTransformerPipe extends AbstractPipe<DataRowModel, DataRowModel> {
 
     /**
      * 留给子类实现。用于子类实现其任务处理逻辑。
@@ -19,15 +17,15 @@ public abstract class AbstractTransformerPipe<IN, OUT> extends AbstractPipe<IN, 
      * @return 任务的处理结果
      * @throws PipeException
      */
-    protected abstract OUT doProcess(IN input) throws PipeException;
+    protected abstract DataRowModel doProcess(DataRowModel input) throws PipeException;
 
     @Override
-    public void process(IN input) throws InterruptedException {
+    public void process(DataRowModel input) throws InterruptedException {
         try {
-            OUT out = doProcess(input);
+            DataRowModel out = doProcess(input);
             if (null != nextPipe) {
                 if (null != out) {
-                    ((Pipe<OUT, ?>) nextPipe).process(out);
+                    ((Pipe<DataRowModel, ?>) nextPipe).process(out);
                 }
             }
         } catch (InterruptedException e) {

@@ -87,6 +87,11 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
         firstPipe.process(input);
     }
 
+    @Override
+    protected void last() {
+
+    }
+
     /**
      * 初始化管道上下文
      *

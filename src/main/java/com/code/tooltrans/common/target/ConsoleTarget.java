@@ -1,7 +1,7 @@
 package com.code.tooltrans.common.target;
 
 import com.alibaba.fastjson.JSONObject;
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IDataTarget;
 
 import java.util.List;
@@ -13,15 +13,15 @@ import java.util.List;
  */
 public class ConsoleTarget implements IDataTarget {
     @Override
-    public boolean save(List<DomainElement> docs, String indexName) {
-        for (DomainElement doc : docs) {
+    public boolean save(List<DataRowModel> docs, String indexName) {
+        for (DataRowModel doc : docs) {
             System.out.println("indexName: " + indexName + "【" + JSONObject.toJSONString(doc) + "】");
         }
         return true;
     }
 
     @Override
-    public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
+    public boolean saveOrUpdate(List<DataRowModel> docs, String indexName) {
         return save(docs, indexName);
     }
 

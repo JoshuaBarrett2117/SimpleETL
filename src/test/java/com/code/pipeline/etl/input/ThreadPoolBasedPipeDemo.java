@@ -1,13 +1,18 @@
 package com.code.pipeline.etl.input;
 
-import com.code.pipeline.core.Pipe;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.pipeline.core.PipeException;
 import com.code.pipeline.core.SimplePipeline;
+import com.code.pipeline.etl.output.ConsoleOutputPipe;
+import com.code.pipeline.etl.output.OldOutputAdapt;
 import com.code.pipeline.etl.transformer.AbstractTransformerPipe;
+import com.code.tooltrans.common.source.text.TextFileSource;
+import com.code.tooltrans.common.target.text.TextFileTarget;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +21,7 @@ public class ThreadPoolBasedPipeDemo {
     private static final Logger logger = LoggerFactory.getLogger(ThreadPoolBasedPipeDemo.class);
 
     @Test
-    public void test() {
+    public void test() throws InterruptedException {
         /*
          * 创建线程池
          */
@@ -34,8 +39,9 @@ public class ThreadPoolBasedPipeDemo {
          * 创建管道线对象
          */
         final SimplePipeline<String, String> pipeline = new SimplePipeline<String, String>();
-        Pipe<Void, String> inputPipe = new AbstractInputPipe<String>() {
-            int count = 10;
+        //创建一个输入管道
+        AbstractInputPipe inputPipe = new AbstractInputPipe() {
+            int count = 5003;
             int ii = 0;
 
             @Override
@@ -44,8 +50,10 @@ public class ThreadPoolBasedPipeDemo {
             }
 
             @Override
-            public String next() {
-                return "Food-" + ii;
+            public DataRowModel next() {
+                DataRowModel dataRowModel = new DataRowModel();
+                dataRowModel.addProperties("food", "Food-" + ii);
+                return dataRowModel;
             }
 
             @Override
@@ -55,14 +63,22 @@ public class ThreadPoolBasedPipeDemo {
         };
         pipeline.addPipe(inputPipe);
         /*
-         * 创建第一条管道
+         * 创建第一条处理管道
          */
-        Pipe<String, String> pipe = new AbstractTransformerPipe<String, String>() {
+        AbstractTransformerPipe pipe = new AbstractTransformerPipe() {
+            Random random = new Random(System.currentTimeMillis());
             @Override
-            protected String doProcess(String input) throws PipeException {
-                String result = input + "->[pipe1," + Thread.currentThread().getName() + "]";
+            protected DataRowModel doProcess(DataRowModel input) throws PipeException {
+                String food = input.getAsString("food");
+                String result = food + "->[pipe1," + Thread.currentThread().getName() + "]";
+                input.addProperties("food", result);
                 logger.info(result);
-                return result;
+                return input;
+            }
+
+            @Override
+            protected void last() {
+
             }
         };
         /*
@@ -73,12 +89,14 @@ public class ThreadPoolBasedPipeDemo {
         /*
          * 创建第二条
          */
-        pipe = new AbstractTransformerPipe<String, String>() {
+        pipe = new AbstractTransformerPipe() {
             @Override
-            protected String doProcess(String input) throws PipeException {
-                String result = input + "->[pipe2," + Thread.currentThread().getName() + "]";
+            protected DataRowModel doProcess(DataRowModel input) throws PipeException {
+                String food = input.getAsString("food");
+                String result = food + "->[pipe2," + Thread.currentThread().getName() + "]";
+                input.addProperties("food", result);
                 logger.info(result);
-                return result;
+                return input;
             }
 
             @Override
@@ -92,20 +110,22 @@ public class ThreadPoolBasedPipeDemo {
                     ;
                 }
             }
+
+            @Override
+            protected void last() {
+
+            }
         };
 
         //将第二条管道加入管道线
         pipeline.addAsThreadPoolBasedPipe(pipe, executorService);
-
+        pipeline.addAsThreadPoolBasedPipe(
+                new OldOutputAdapt(
+                        "", new TextFileTarget("C:\\Users\\joshua\\Desktop\\123.txt", "food")), executorService);
         //管道线初始化
         pipeline.init(pipeline.newDefaultPipelineContext());
-        try {
-            pipeline.process(null);
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        pipeline.process(null);
 
         pipeline.shutdown(1, TimeUnit.SECONDS);
 

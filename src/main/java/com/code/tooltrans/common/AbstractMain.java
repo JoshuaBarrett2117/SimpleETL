@@ -1,7 +1,7 @@
 package com.code.tooltrans.common;
 
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,7 +35,7 @@ public abstract class AbstractMain {
     }
 
     public void deal(IDataSource.Exp sourceSql, String targetTableName) {
-        Iterator<DomainElement> iterator = warpTranslator(sourceSql);
+        Iterator<DataRowModel> iterator = warpTranslator(sourceSql);
         if (target != null) {
             start(target, iterator, targetTableName);
         }
@@ -47,16 +47,16 @@ public abstract class AbstractMain {
      * @param sourceSql 数据源入参表达式
      * @return 最上层迭代器
      */
-    public Iterator<DomainElement> warpTranslator(IDataSource.Exp sourceSql) {
+    public Iterator<DataRowModel> warpTranslator(IDataSource.Exp sourceSql) {
         //构建数据源和目标数据源
         source = buildDataSource(properties);
         target = buildDataTarget(properties);
-        Iterator<DomainElement> iterator = source.iterator(sourceSql);
+        Iterator<DataRowModel> iterator = source.iterator(sourceSql);
         //获取转换流程
         List<IIteratorTranslator> translators = getTranslators();
         if (translators != null) {
             for (IIteratorTranslator translator : translators) {
-                Iterator<DomainElement> nullIterator = new NullDealTranslator().transIterator(iterator);
+                Iterator<DataRowModel> nullIterator = new NullDealTranslator().transIterator(iterator);
                 iterator = translator.transIterator(nullIterator);
             }
         }
@@ -89,13 +89,13 @@ public abstract class AbstractMain {
     protected abstract IDataTarget buildDataTarget(Properties properties);
 
     //执行流程
-    private static void start(IDataTarget target, Iterator<DomainElement> iter, String tableName) {
+    private static void start(IDataTarget target, Iterator<DataRowModel> iter, String tableName) {
         long count = 0;
         long allStart = System.currentTimeMillis();
         long start = allStart;
-        List<DomainElement> docs = new ArrayList();
+        List<DataRowModel> docs = new ArrayList();
         while (iter.hasNext()) {
-            DomainElement next = iter.next();
+            DataRowModel next = iter.next();
             //删除数据时用
             if (next == null) {
                 continue;
@@ -130,10 +130,10 @@ public abstract class AbstractMain {
 
     class NullDealTranslator implements IIteratorTranslator {
         @Override
-        public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-            return new Iterator<DomainElement>() {
+        public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
+            return new Iterator<DataRowModel>() {
                 boolean isOut = true;
-                DomainElement next;
+                DataRowModel next;
 
                 @Override
                 public boolean hasNext() {
@@ -153,7 +153,7 @@ public abstract class AbstractMain {
                 }
 
                 @Override
-                public DomainElement next() {
+                public DataRowModel next() {
                     isOut = true;
                     return next;
                 }

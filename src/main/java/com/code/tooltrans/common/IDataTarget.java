@@ -1,7 +1,7 @@
 package com.code.tooltrans.common;
 
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 
 import java.util.List;
 
@@ -11,9 +11,9 @@ import java.util.List;
  * @Date 2020/3/26 10:08
  */
 public interface IDataTarget {
-    boolean save(List<DomainElement> docs, String indexName);
+    boolean save(List<DataRowModel> docs, String indexName);
 
-    boolean saveOrUpdate(List<DomainElement> docs, String indexName);
+    boolean saveOrUpdate(List<DataRowModel> docs, String indexName);
 
     boolean close();
 }

@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.translator;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IIteratorTranslator;
 
 import java.util.*;
@@ -30,10 +30,10 @@ public class StringSplitTranslator implements IIteratorTranslator {
     }
 
     @Override
-    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-        return new Iterator<DomainElement>() {
+    public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
+        return new Iterator<DataRowModel>() {
 
-            Iterator<DomainElement> temps = Collections.EMPTY_LIST.iterator();
+            Iterator<DataRowModel> temps = Collections.EMPTY_LIST.iterator();
 
             @Override
             public boolean hasNext() {
@@ -45,14 +45,14 @@ public class StringSplitTranslator implements IIteratorTranslator {
             }
 
             @Override
-            public DomainElement next() {
+            public DataRowModel next() {
                 if (!temps.hasNext()) {
                     if (iterator.hasNext()) {
-                        DomainElement next = iterator.next();
+                        DataRowModel<Object> next = iterator.next();
                         List<String> words = func.split(next.get(key).toString());
-                        List<DomainElement> elements = new ArrayList<>();
+                        List<DataRowModel> elements = new ArrayList<>();
                         for (String word : words) {
-                            DomainElement d = new DomainElement();
+                            DataRowModel d = new DataRowModel();
                             for (Map.Entry<String, Object> entry : next.getProperties().entrySet()) {
                                 d.addProperties(entry.getKey(), entry.getValue());
                             }

@@ -1,7 +1,7 @@
 package com.code.common.dao.jdbc.util;
 
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.jdbc.operator.Software;
 
 import java.sql.Timestamp;
@@ -17,7 +17,7 @@ import java.util.Set;
 public class SaveOrUpdateCreater {
     public static void main(String[] args) {
         Software software = new Software("MYSql");
-        DomainElement element = new DomainElement();
+        DataRowModel element = new DataRowModel();
         element.addProperties("field1", "1");
         element.addProperties("field2", 2);
         element.addProperties("field3", new Timestamp(System.currentTimeMillis()));
@@ -28,8 +28,8 @@ public class SaveOrUpdateCreater {
         System.out.println(create("table3", element, software));
     }
 
-    public static String create(String tableName, DomainElement domainElement, Software software) throws IllegalArgumentException {
-        Map<String, Object> properties = domainElement.getProperties();
+    public static String create(String tableName, DataRowModel dataRowModel, Software software) throws IllegalArgumentException {
+        Map<String, Object> properties = dataRowModel.getProperties();
         if (software.getCode().equalsIgnoreCase("ORACLE")) {
             return oracleSql(tableName, properties);
         } else if (software.getCode().equalsIgnoreCase("postgresql")) {

@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.translator;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IIteratorTranslator;
 
 import java.util.Iterator;
@@ -20,9 +20,9 @@ public class ConditionDeleteTranslator implements IIteratorTranslator {
     }
 
     @Override
-    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
+    public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
 
-        return new Iterator<DomainElement>() {
+        return new Iterator<DataRowModel>() {
             int count = 0;
 
             @Override
@@ -35,8 +35,8 @@ public class ConditionDeleteTranslator implements IIteratorTranslator {
             }
 
             @Override
-            public DomainElement next() {
-                DomainElement next = iterator.next();
+            public DataRowModel next() {
+                DataRowModel next = iterator.next();
                 if (condition.isFilter(next, key)) {
                     count++;
                     return null;
@@ -47,6 +47,6 @@ public class ConditionDeleteTranslator implements IIteratorTranslator {
     }
 
     public interface Condition {
-        boolean isFilter(DomainElement domainElement, String key);
+        boolean isFilter(DataRowModel dataRowModel, String key);
     }
 }

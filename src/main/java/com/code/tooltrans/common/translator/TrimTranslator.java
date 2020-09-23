@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.translator;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IIteratorTranslator;
 
 import java.util.Iterator;
@@ -18,16 +18,16 @@ public class TrimTranslator implements IIteratorTranslator {
     }
 
     @Override
-    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-        return new Iterator<DomainElement>() {
+    public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
+        return new Iterator<DataRowModel>() {
             @Override
             public boolean hasNext() {
                 return iterator.hasNext();
             }
 
             @Override
-            public DomainElement next() {
-                DomainElement next = iterator.next();
+            public DataRowModel next() {
+                DataRowModel next = iterator.next();
                 next.addProperties(key, next.get(key).toString().replace(" ", ""));
                 return next;
             }

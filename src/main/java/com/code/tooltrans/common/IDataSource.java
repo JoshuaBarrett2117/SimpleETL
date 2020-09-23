@@ -1,7 +1,7 @@
 package com.code.tooltrans.common;
 
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,9 +13,9 @@ import java.util.List;
  * @Date 2020/3/26 10:02
  */
 public interface IDataSource {
-    Iterator<DomainElement> iterator(Exp sql);
+    Iterator<DataRowModel> iterator(Exp sql);
 
-    DomainElement queryForObject(Exp sql);
+    DataRowModel queryForObject(Exp sql);
 
     class Exp {
         public Exp(String exp) {

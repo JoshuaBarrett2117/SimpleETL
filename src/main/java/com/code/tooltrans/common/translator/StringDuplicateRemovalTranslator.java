@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.translator;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IIteratorTranslator;
 
 import java.util.Iterator;
@@ -17,8 +17,8 @@ public class StringDuplicateRemovalTranslator implements IIteratorTranslator {
 
     private String key;
 
-    private Map<String, DomainElement> temp = new ConcurrentHashMap<>();
-    private static final DomainElement EMPTY_DE = new DomainElement();
+    private Map<String, DataRowModel> temp = new ConcurrentHashMap<>();
+    private static final DataRowModel EMPTY_DE = new DataRowModel();
     private AtomicLong count = new AtomicLong();
 
     public StringDuplicateRemovalTranslator(String key) {
@@ -26,9 +26,9 @@ public class StringDuplicateRemovalTranslator implements IIteratorTranslator {
     }
 
     @Override
-    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
+    public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
 
-        return new Iterator<DomainElement>() {
+        return new Iterator<DataRowModel>() {
             String text;
             boolean isOut = true;
 
@@ -38,7 +38,7 @@ public class StringDuplicateRemovalTranslator implements IIteratorTranslator {
                     return true;
                 }
                 while (iterator.hasNext()) {
-                    DomainElement next = iterator.next();
+                    DataRowModel next = iterator.next();
                     text = next.get(key).toString().trim();
                     if (!temp.containsKey(text)) {
                         next.addProperties(key, text);
@@ -56,11 +56,11 @@ public class StringDuplicateRemovalTranslator implements IIteratorTranslator {
             }
 
             @Override
-            public DomainElement next() {
+            public DataRowModel next() {
                 isOut = true;
-                DomainElement domainElement = temp.get(text);
+                DataRowModel dataRowModel = temp.get(text);
                 temp.put(text, EMPTY_DE);
-                return domainElement;
+                return dataRowModel;
             }
         };
     }

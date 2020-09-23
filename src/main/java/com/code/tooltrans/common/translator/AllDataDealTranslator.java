@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.translator;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IIteratorTranslator;
 
 import java.util.ArrayList;
@@ -22,8 +22,8 @@ public class AllDataDealTranslator implements IIteratorTranslator {
     }
 
     @Override
-    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-        List<DomainElement> result = new ArrayList<>();
+    public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
+        List<DataRowModel> result = new ArrayList<>();
         while (iterator.hasNext()) {
             result.add(iterator.next());
         }
@@ -31,6 +31,6 @@ public class AllDataDealTranslator implements IIteratorTranslator {
     }
 
     public interface Func {
-        List<DomainElement> collect(List<DomainElement> list);
+        List<DataRowModel> collect(List<DataRowModel> list);
     }
 }

@@ -35,4 +35,11 @@ public interface Pipe<IN, OUT> {
      * 对输入元素进行处理，并将处理结果作为下一个Pipe实例的输入。
      */
     void process(IN input) throws InterruptedException;
+
+    /**
+     * 所有数据都处理完了
+     *
+     * @throws InterruptedException
+     */
+    void over() throws InterruptedException;
 }

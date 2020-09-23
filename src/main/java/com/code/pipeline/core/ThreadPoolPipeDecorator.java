@@ -41,11 +41,12 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
                 try {
                     delegate.process(input);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.error("发生异常，中断线程", e);
+                    Thread.currentThread().interrupt();
                 } finally {
                     //任务完成后-1
                     remainingReservations = terminationToken.reservations.decrementAndGet();
-//                    logger.info("剩余任务数量是：" + remainingReservations);
+                    logger.info("剩余任务数量是：" + remainingReservations);
                 }
                 if (terminationToken.isToShutdown() && 0 == remainingReservations) {
                     stageProcessDoneLatch.countDown();
@@ -53,10 +54,42 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
             }
         };
 
-        executorService.submit(task);
-        int i = terminationToken.reservations.incrementAndGet();
-//        logger.info("当前任务数量是：" + i);
+        executorService.execute(task);
 
+        int i = terminationToken.reservations.incrementAndGet();
+        logger.info("当前任务数量是：" + i);
+
+    }
+
+    @Override
+    public void over() throws InterruptedException {
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                int remainingReservations = -1;
+                try {
+                    delegate.over();
+                } catch (InterruptedException e) {
+                    logger.error("发生异常，中断线程", e);
+                    Thread.currentThread().interrupt();
+                } finally {
+                    //任务完成后-1
+                    remainingReservations = terminationToken.reservations.decrementAndGet();
+                    logger.info("剩余任务数量是：" + remainingReservations);
+                }
+                if (terminationToken.isToShutdown() && 0 == remainingReservations) {
+                    stageProcessDoneLatch.countDown();
+                }
+            }
+        };
+
+        Future<?> submit = executorService.submit(task);
+        try {
+            submit.get();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+        terminationToken.reservations.incrementAndGet();
     }
 
     @Override

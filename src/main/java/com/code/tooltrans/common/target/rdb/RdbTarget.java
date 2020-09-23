@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.target.rdb;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.jdbc.operator.JdbcOperator;
 import com.code.common.dao.jdbc.operator.Software;
 import com.code.common.dao.jdbc.util.DbUtil;
@@ -24,9 +24,9 @@ public class RdbTarget implements IDataTarget {
     }
 
     @Override
-    public boolean save(List<DomainElement> docs, String indexName) {
+    public boolean save(List<DataRowModel> docs, String indexName) {
         JdbcOperator operator = new JdbcOperator(connection, software);
-        for (DomainElement doc : docs) {
+        for (DataRowModel doc : docs) {
             operator.save(indexName, doc);
         }
         operator.commit();
@@ -34,9 +34,9 @@ public class RdbTarget implements IDataTarget {
     }
 
     @Override
-    public boolean saveOrUpdate(List<DomainElement> docs, String indexName) {
+    public boolean saveOrUpdate(List<DataRowModel> docs, String indexName) {
         JdbcOperator operator = new JdbcOperator(connection, software);
-        for (DomainElement doc : docs) {
+        for (DataRowModel doc : docs) {
             operator.saveOrUpdate(indexName, doc);
         }
         operator.commit();

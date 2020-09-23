@@ -1,6 +1,6 @@
 package com.code.tooltrans.business.address.posserial;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.jdbc.operator.Software;
 import com.code.tooltrans.common.*;
 import com.code.tooltrans.common.source.rdb.RdbSource;
@@ -63,18 +63,18 @@ public class AddressPatternFinder extends AbstractMain {
                 new HanlpSegmentTranslator("text", HanLP.newSegment()),
                 new IIteratorTranslator() {
                     @Override
-                    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-                        return new Iterator<DomainElement>() {
+                    public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
+                        return new Iterator<DataRowModel>() {
                             @Override
                             public boolean hasNext() {
                                 return iterator.hasNext();
                             }
 
                             @Override
-                            public DomainElement next() {
-                                DomainElement next = iterator.next();
+                            public DataRowModel next() {
+                                DataRowModel next = iterator.next();
                                 List<Term> segs = (List<Term>) next.getProperties().remove("seg");
-                                DomainElement trueNext = new DomainElement();
+                                DataRowModel trueNext = new DataRowModel();
                                 trueNext.addProperties("src_address", next.get("ADDRESS"));
                                 trueNext.addProperties("target_address", next.get("text"));
                                 StringBuilder posSerialBuilder = new StringBuilder();

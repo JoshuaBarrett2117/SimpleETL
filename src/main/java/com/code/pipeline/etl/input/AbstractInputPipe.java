@@ -1,5 +1,6 @@
 package com.code.pipeline.etl.input;
 
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.pipeline.core.AbstractPipe;
 import com.code.pipeline.core.Pipe;
 
@@ -15,17 +16,33 @@ import java.util.concurrent.TimeUnit;
  *
  * @author liufei
  */
-public abstract class AbstractInputPipe<OUT> extends AbstractPipe<Void, OUT> implements IInputPipe<OUT> {
+public abstract class AbstractInputPipe extends AbstractPipe<Void, DataRowModel> implements IInputPipe {
     @Override
     public void process(Void input) throws InterruptedException {
         while (this.hasNext()) {
-            OUT out = this.next();
+            DataRowModel out = this.next();
             if (null != nextPipe) {
                 if (null != out) {
-                    ((Pipe<OUT, ?>) nextPipe).process(out);
+                    ((Pipe<DataRowModel, ?>) nextPipe).process(out);
                 }
             }
         }
+        this.over();
+    }
+
+    @Override
+    protected void last() {
+
+    }
+
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
+
+    @Override
+    public DataRowModel next() {
+        return null;
     }
 
     @Override

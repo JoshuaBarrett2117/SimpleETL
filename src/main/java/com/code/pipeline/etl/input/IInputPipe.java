@@ -1,6 +1,6 @@
 package com.code.pipeline.etl.input;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 
 import java.util.Iterator;
 
@@ -14,5 +14,5 @@ import java.util.Iterator;
  *
  * @author liufei
  */
-public interface IInputPipe<OUT> extends Iterator<OUT> {
+public interface IInputPipe  extends Iterator<DataRowModel> {
 }

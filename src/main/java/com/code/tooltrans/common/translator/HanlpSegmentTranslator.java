@@ -1,6 +1,6 @@
 package com.code.tooltrans.common.translator;
 
-import com.code.common.dao.core.model.DomainElement;
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IIteratorTranslator;
 import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
@@ -33,16 +33,16 @@ public class HanlpSegmentTranslator implements IIteratorTranslator {
     }
 
     @Override
-    public Iterator<DomainElement> transIterator(Iterator<DomainElement> iterator) {
-        return new Iterator<DomainElement>() {
+    public Iterator<DataRowModel> transIterator(Iterator<DataRowModel> iterator) {
+        return new Iterator<DataRowModel>() {
             @Override
             public boolean hasNext() {
                 return iterator.hasNext();
             }
 
             @Override
-            public DomainElement next() {
-                DomainElement next = iterator.next();
+            public DataRowModel next() {
+                DataRowModel next = iterator.next();
                 Object o = next.get(key);
                 if (o == null) {
                     return null;

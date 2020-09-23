@@ -1,5 +1,6 @@
 package com.code.pipeline.etl.transformer;
 
+import com.code.common.dao.core.model.DataRowModel;
 import com.code.pipeline.core.Pipe;
 
 /**
@@ -12,12 +13,12 @@ import com.code.pipeline.core.Pipe;
  *
  * @author liufei
  */
-public interface ITransformerPipe<IN, OUT> extends Pipe<IN, OUT> {
+public interface ITransformerPipe extends Pipe<DataRowModel, DataRowModel> {
     /**
      * 转换流程
      *
      * @param in 上游输入数据
      * @return 下游数据
      */
-    OUT transformer(IN in);
+    DataRowModel transformer(DataRowModel in);
 }
