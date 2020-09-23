@@ -41,18 +41,19 @@ public class ThreadPoolBasedPipeDemo {
         final SimplePipeline<String, String> pipeline = new SimplePipeline<String, String>();
         //创建一个输入管道
         AbstractInputPipe inputPipe = new AbstractInputPipe() {
-            int count = 5003;
-            int ii = 0;
+            int count = 5001;
+            int ii = 1;
 
             @Override
             public boolean hasNext() {
-                return ii++ < count;
+                return ii <= count;
             }
 
             @Override
             public DataRowModel next() {
                 DataRowModel dataRowModel = new DataRowModel();
                 dataRowModel.addProperties("food", "Food-" + ii);
+                ii++;
                 return dataRowModel;
             }
 
@@ -67,12 +68,18 @@ public class ThreadPoolBasedPipeDemo {
          */
         AbstractTransformerPipe pipe = new AbstractTransformerPipe() {
             Random random = new Random(System.currentTimeMillis());
+
             @Override
             protected DataRowModel doProcess(DataRowModel input) throws PipeException {
                 String food = input.getAsString("food");
                 String result = food + "->[pipe1," + Thread.currentThread().getName() + "]";
                 input.addProperties("food", result);
                 logger.info(result);
+                try {
+                    Thread.sleep(random.nextInt(10));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 return input;
             }
 
@@ -102,13 +109,6 @@ public class ThreadPoolBasedPipeDemo {
             @Override
             public void shutdown(long timeout, TimeUnit unit) {
                 // 在最后一个Pipe中关闭线程池
-                logger.debug("最后一个管道关闭时候队列的大小" + executorService.getQueue().size());
-                executorService.shutdown();
-                try {
-                    executorService.awaitTermination(timeout, unit);
-                } catch (InterruptedException e) {
-                    ;
-                }
             }
 
             @Override
@@ -127,7 +127,10 @@ public class ThreadPoolBasedPipeDemo {
 
         pipeline.process(null);
 
-        pipeline.shutdown(1, TimeUnit.SECONDS);
+        //关闭所有管道
+        pipeline.shutdown(10, TimeUnit.SECONDS);
+
+
 
     }
 

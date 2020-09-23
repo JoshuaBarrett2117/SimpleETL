@@ -37,7 +37,7 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
         Runnable task = new Runnable() {
             @Override
             public void run() {
-                int remainingReservations = -1;
+                int remainingReservations = 0;
                 try {
                     delegate.process(input);
                 } catch (InterruptedException e) {
@@ -55,7 +55,6 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
         };
 
         executorService.execute(task);
-
         int i = terminationToken.reservations.incrementAndGet();
         logger.info("当前任务数量是：" + i);
 
@@ -83,12 +82,7 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
             }
         };
 
-        Future<?> submit = executorService.submit(task);
-        try {
-            submit.get();
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        executorService.execute(task);
         terminationToken.reservations.incrementAndGet();
     }
 
@@ -103,7 +97,7 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
                     stageProcessDoneLatch.await(timeout, unit);
                 }
             } catch (InterruptedException e) {
-                ;
+                throw new RuntimeException(e);
             }
         }
         logger.info("Decorator调用delegate的关闭方法的线程是：  " + Thread.currentThread().getName());

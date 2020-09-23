@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
  * @author liufei
  */
 public class ConsoleOutputPipe extends AbstractOutPipe {
+
     public ConsoleOutputPipe(String outputTable) {
         super(outputTable);
     }
@@ -30,7 +31,7 @@ public class ConsoleOutputPipe extends AbstractOutPipe {
 
 
     @Override
-    public void shutdown(long timeout, TimeUnit unit) {
+    public void close(long timeout, TimeUnit unit) {
 
     }
 }

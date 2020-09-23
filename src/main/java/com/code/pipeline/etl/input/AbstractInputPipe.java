@@ -3,6 +3,8 @@ package com.code.pipeline.etl.input;
 import com.code.common.dao.core.model.DataRowModel;
 import com.code.pipeline.core.AbstractPipe;
 import com.code.pipeline.core.Pipe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +19,8 @@ import java.util.concurrent.TimeUnit;
  * @author liufei
  */
 public abstract class AbstractInputPipe extends AbstractPipe<Void, DataRowModel> implements IInputPipe {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractInputPipe.class);
+
     @Override
     public void process(Void input) throws InterruptedException {
         while (this.hasNext()) {
@@ -27,22 +31,13 @@ public abstract class AbstractInputPipe extends AbstractPipe<Void, DataRowModel>
                 }
             }
         }
+        logger.info("输入插件抽取完成");
         this.over();
     }
 
     @Override
     protected void last() {
 
-    }
-
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
-
-    @Override
-    public DataRowModel next() {
-        return null;
     }
 
     @Override

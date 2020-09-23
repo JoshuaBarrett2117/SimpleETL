@@ -25,12 +25,14 @@ public class OldOutputAdapt extends AbstractOutPipe {
     }
 
     @Override
-    public void shutdown(long timeout, TimeUnit unit) {
-        dataTarget.close();
-    }
-
-    @Override
     public void out(List<DataRowModel> out) {
         dataTarget.save(out, outputTable);
     }
+
+    @Override
+    public void close(long timeout, TimeUnit unit) {
+        dataTarget.close();
+    }
+
+
 }

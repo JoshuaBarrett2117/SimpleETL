@@ -6,7 +6,6 @@ import com.code.pipeline.core.AbstractPipe;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,6 +25,7 @@ public abstract class AbstractOutPipe extends AbstractPipe<DataRowModel, Void> i
     protected List<DataRowModel> rowModels = Collections.synchronizedList(new ArrayList<>());
     protected AtomicInteger currCount = new AtomicInteger(0);
     protected String outputTable;
+    private Object lock = new Object();
 
     public AbstractOutPipe(String outputTable) {
         this.outputTable = outputTable;
@@ -35,7 +35,7 @@ public abstract class AbstractOutPipe extends AbstractPipe<DataRowModel, Void> i
     public void process(DataRowModel input) throws InterruptedException {
         int size = currCount.incrementAndGet();
         if (size % batchSize == 0) {
-            this.out(rowModels);
+            write();
             rowModels.clear();
         }
         rowModels.add(input);
@@ -43,10 +43,20 @@ public abstract class AbstractOutPipe extends AbstractPipe<DataRowModel, Void> i
 
     @Override
     protected void last() {
-        this.out(rowModels);
+        write();
         rowModels.clear();
     }
 
+    private synchronized void write() {
+        this.out(rowModels);
+    }
+
+
     @Override
-    public abstract void shutdown(long timeout, TimeUnit unit);
+    public void shutdown(long timeout, TimeUnit unit) {
+        this.last();
+        this.close(timeout, unit);
+    }
+
+    protected abstract void close(long timeout, TimeUnit unit);
 }
