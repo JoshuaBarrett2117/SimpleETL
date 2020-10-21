@@ -13,6 +13,8 @@ http://www.broadview.com.cn/38245
 
 package com.code.pipeline.core;
 
+import com.hankcs.hanlp.corpus.document.sentence.word.IWord;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,30 +24,31 @@ import java.util.concurrent.TimeUnit;
  * @param <OUT> 输出类型
  * @author Viscent Huang
  */
-public abstract class AbstractPipe<IN, OUT> implements Pipe<IN, OUT> {
-    protected volatile Pipe<?, ?> nextPipe = null;
-    protected volatile PipeContext pipeCtx;
-    protected String name;
+public abstract class AbstractSingleWorkerPipe<IN, OUT> extends AbstractPipe<IN, OUT> {
+    private IWorker<IN, OUT> worker;
 
-    public AbstractPipe(String name) {
-        this.name = name;
+
+    public AbstractSingleWorkerPipe(String name, IWorker<IN, OUT> worker) {
+        super(name);
+        this.worker = worker;
     }
 
     @Override
-    public void init(PipeContext pipeCtx) {
-        this.pipeCtx = pipeCtx;
-
+    @SuppressWarnings("unchecked")
+    public void process(IN input) throws InterruptedException {
+        try {
+            OUT out = worker.doRun(input);
+            if (null != nextPipe) {
+                if (null != out) {
+                    ((Pipe<OUT, ?>) nextPipe).process(out);
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (PipeException e) {
+            pipeCtx.handleError(e);
+        } catch (Exception e1) {
+            pipeCtx.handleError(new PipeException(this, input, "", e1));
+        }
     }
-
-    @Override
-    public void setNextPipe(Pipe<?, ?> nextPipe) {
-        this.nextPipe = nextPipe;
-
-    }
-
-    @Override
-    public void shutdown(long timeout, TimeUnit unit) {
-        // 什么也不做
-    }
-
 }

@@ -57,19 +57,15 @@ public class TextFileTarget implements IDataTarget {
             try {
                 bufferedWriter.write(doc.get(elementKey).toString());
                 bufferedWriter.write("\r\n");
+                bufferedWriter.flush();
             } catch (IOException e) {
+                try {
+                    bufferedWriter.close();
+                } catch (IOException ex) {
+                    throw new RuntimeException(e);
+                }
                 throw new RuntimeException(e);
             }
-        }
-        try {
-            bufferedWriter.flush();
-        } catch (IOException e) {
-            try {
-                bufferedWriter.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(e);
-            }
-            throw new RuntimeException(e);
         }
         return true;
     }

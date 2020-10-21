@@ -1,58 +1,61 @@
+/*
+授权声明：
+本源码系《Java多线程编程实战指南（设计模式篇）第2版》一书（ISBN：978-7-121-38245-1，以下称之为“原书”）的配套源码，
+欲了解本代码的更多细节，请参考原书。
+本代码仅为原书的配套说明之用，并不附带任何承诺（如质量保证和收益）。
+以任何形式将本代码之部分或者全部用于营利性用途需经版权人书面同意。
+将本代码之部分或者全部用于非营利性用途需要在代码中保留本声明。
+任何对本代码的修改需在代码中以注释的形式注明修改人、修改时间以及修改内容。
+本代码可以从以下网址下载：
+https://github.com/Viscent/javamtp
+http://www.broadview.com.cn/38245
+*/
+
 package com.code.pipeline.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-/**
- * 简单的管道线实现，简单的组织管道线
- *
- * @param <T>
- * @param <OUT>
- */
 public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipeline<T, OUT> {
-    private static final Logger logger = LoggerFactory.getLogger(SimplePipeline.class);
-    /**
-     * 管道队列
-     */
-    protected final Queue<Pipe<?, ?>> pipes = new LinkedList<Pipe<?, ?>>();
+    private final static Logger logger = Logger.getLogger(SimplePipeline.class);
+    private final Queue<Pipe<?, ?>> pipes = new LinkedList<Pipe<?, ?>>();
 
-    /**
-     * 线程池服务
-     */
-    protected final ExecutorService helperExecutor;
+    private final ExecutorService helperExecutor;
 
-    public SimplePipeline() {
-        this(Executors.newSingleThreadExecutor(new ThreadFactory() {
+    public SimplePipeline(String name) {
+        this(name, Executors.newSingleThreadExecutor(new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
                 Thread t = new Thread(r, "SimplePipeline-Helper");
-                t.setDaemon(false);
+                t.setDaemon(true);
                 return t;
             }
         }));
+
     }
 
-    public SimplePipeline(final ExecutorService helperExecutor) {
-        super();
+    public SimplePipeline(String name, final ExecutorService helperExecutor) {
+        super(name);
         this.helperExecutor = helperExecutor;
     }
 
     @Override
     public void shutdown(long timeout, TimeUnit unit) {
         Pipe<?, ?> pipe;
-        logger.info("开始关闭管道");
-        //从队列中一个个移除管道并关闭管道
+
         while (null != (pipe = pipes.poll())) {
             pipe.shutdown(timeout, unit);
         }
+
         helperExecutor.shutdown();
+
     }
 
     @Override
@@ -61,42 +64,25 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
         pipes.add(pipe);
     }
 
-
-    /**
-     * 带线程池的管道装饰
-     *
-     * @param delegate
-     * @param executorService
-     * @param <INPUT>
-     * @param <OUTPUT>
-     */
-    public <INPUT, OUTPUT> void addAsThreadPoolBasedPipe(Pipe<INPUT, OUTPUT> delegate, ExecutorService executorService) {
-        addPipe(new ThreadPoolPipeDecorator<INPUT, OUTPUT>(delegate, executorService));
+    public <INPUT, OUTPUT> void addAsWorkerThreadBasedPipe(Pipe<INPUT, OUTPUT> delegate, int workerCount) {
+        addPipe(new WorkerThreadPipeDecorator<INPUT, OUTPUT>(delegate, workerCount));
     }
 
-    /**
-     * 执行管道线
-     *
-     * @param input
-     * @throws InterruptedException
-     */
+    public <INPUT, OUTPUT> void addAsThreadPoolBasedPipe(
+            Pipe<INPUT, OUTPUT> delegate, ExecutorService executorSerivce) {
+        addPipe(new ThreadPoolPipeDecorator<INPUT, OUTPUT>(delegate,
+                executorSerivce));
+    }
+
     @Override
     public void process(T input) throws InterruptedException {
-        //从队列中取出一个头部的管道
+        @SuppressWarnings("unchecked")
         Pipe<T, ?> firstPipe = (Pipe<T, ?>) pipes.peek();
+
         firstPipe.process(input);
     }
 
-    @Override
-    protected void last() {
-
-    }
-
-    /**
-     * 初始化管道上下文
-     *
-     * @param ctx
-     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void init(final PipeContext ctx) {
         LinkedList<Pipe<?, ?>> pipesList = (LinkedList<Pipe<?, ?>>) pipes;
@@ -105,17 +91,29 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
             prevPipe.setNextPipe(pipe);
             prevPipe = pipe;
         }
+        helperExecutor.submit(new PipeInitTask(ctx, (List) pipes));
+    }
 
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
+    static class PipeInitTask implements Runnable {
+        final List<Pipe<?, ?>> pipes;
+        final PipeContext ctx;
+
+        public PipeInitTask(PipeContext ctx, List<Pipe<?, ?>> pipes) {
+            this.pipes = pipes;
+            this.ctx = ctx;
+        }
+
+        @Override
+        public void run() {
+            try {
                 for (Pipe<?, ?> pipe : pipes) {
                     pipe.init(ctx);
                 }
+            } catch (Exception e) {
+                logger.error("Failed to init pipe", e);
             }
-        };
-        //submit有返回值，而execute没有，submit方便Exception处理
-        helperExecutor.submit(task);
+        }
+
     }
 
     public PipeContext newDefaultPipelineContext() {
@@ -125,10 +123,11 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
                 helperExecutor.submit(new Runnable() {
                     @Override
                     public void run() {
-                        exp.printStackTrace();
+                        logger.error("", exp);
                     }
                 });
             }
+
         };
     }
 }

@@ -1,30 +1,46 @@
+/*
+授权声明：
+本源码系《Java多线程编程实战指南（设计模式篇）第2版》一书（ISBN：978-7-121-38245-1，以下称之为“原书”）的配套源码，
+欲了解本代码的更多细节，请参考原书。
+本代码仅为原书的配套说明之用，并不附带任何承诺（如质量保证和收益）。
+以任何形式将本代码之部分或者全部用于营利性用途需经版权人书面同意。
+将本代码之部分或者全部用于非营利性用途需要在代码中保留本声明。
+任何对本代码的修改需在代码中以注释的形式注明修改人、修改时间以及修改内容。
+本代码可以从以下网址下载：
+https://github.com/Viscent/javamtp
+http://www.broadview.com.cn/38245
+*/
+
 package com.code.pipeline.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
- * 带线程池的管道
+ * 基于线程池的Pipe实现类。
  *
- * @param <IN>
- * @param <OUT>
+ * @param <IN>  输入类型
+ * @param <OUT> 输出类型
+ * @author Viscent Huang
  */
 public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
-    private static final Logger logger = LoggerFactory.getLogger(ThreadPoolPipeDecorator.class);
-    private String name = "->";
     private final Pipe<IN, OUT> delegate;
-    private final ExecutorService executorService;
+    private final ExecutorService executorSerivce;
+    private final Logger logger = LoggerFactory.getLogger(ThreadPoolPipeDecorator.class);
 
-    // 线程池停止标志。
+    //线程池停止标志。
     private final TerminationToken terminationToken;
-    private final CountDownLatch stageProcessDoneLatch = new CountDownLatch(1);
 
-    public ThreadPoolPipeDecorator(Pipe<IN, OUT> delegate, ExecutorService executorService) {
+    public ThreadPoolPipeDecorator(Pipe<IN, OUT> delegate,
+                                   ExecutorService executorSerivce) {
         this.delegate = delegate;
-        this.executorService = executorService;
-        this.terminationToken = TerminationToken.newInstance(executorService);
+        this.executorSerivce = executorSerivce;
+        this.terminationToken = TerminationToken.newInstance(executorSerivce);
     }
 
     @Override
@@ -34,73 +50,34 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
 
     @Override
     public void process(final IN input) throws InterruptedException {
+
         Runnable task = new Runnable() {
             @Override
             public void run() {
-                int remainingReservations = 0;
                 try {
                     delegate.process(input);
                 } catch (InterruptedException e) {
-                    logger.error("发生异常，中断线程", e);
-                    Thread.currentThread().interrupt();
+                    ;
                 } finally {
-                    //任务完成后-1
-                    remainingReservations = terminationToken.reservations.decrementAndGet();
-                    logger.info("剩余任务数量是：" + remainingReservations);
-                }
-                if (terminationToken.isToShutdown() && 0 == remainingReservations) {
-                    stageProcessDoneLatch.countDown();
+                    terminationToken.reservations.decrementAndGet();
                 }
             }
+
         };
 
-        executorService.execute(task);
-        int i = terminationToken.reservations.incrementAndGet();
-        logger.info("当前任务数量是：" + i);
-
-    }
-
-    @Override
-    public void over() throws InterruptedException {
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                int remainingReservations = -1;
-                try {
-                    delegate.over();
-                } catch (InterruptedException e) {
-                    logger.error("发生异常，中断线程", e);
-                    Thread.currentThread().interrupt();
-                } finally {
-                    //任务完成后-1
-                    remainingReservations = terminationToken.reservations.decrementAndGet();
-                    logger.info("剩余任务数量是：" + remainingReservations);
-                }
-                if (terminationToken.isToShutdown() && 0 == remainingReservations) {
-                    stageProcessDoneLatch.countDown();
-                }
-            }
-        };
-
-        executorService.execute(task);
+        executorSerivce.submit(task);
         terminationToken.reservations.incrementAndGet();
+
     }
 
     @Override
     public void shutdown(long timeout, TimeUnit unit) {
         terminationToken.setIsToShutdown();
+        logger.info("[{}]:等待关闭线程池", ((AbstractPipe) delegate).name);
+        while (terminationToken.reservations.get() > 0) {
 
-        if (terminationToken.reservations.get() > 0) {
-            try {
-                if (stageProcessDoneLatch.getCount() > 0) {
-                    logger.info("Decorator调用管道的关闭方法的线程是：  " + Thread.currentThread().getName());
-                    stageProcessDoneLatch.await(timeout, unit);
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
-        logger.info("Decorator调用delegate的关闭方法的线程是：  " + Thread.currentThread().getName());
+        logger.info("[{}]:完成", ((AbstractPipe) delegate).name);
         delegate.shutdown(timeout, unit);
     }
 
@@ -110,13 +87,15 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
     }
 
     /**
-     * 线程池停止标志。 每个ExecutorService实例对应唯一的一个TerminationToken实例。 这里使用了Two-phase
-     * Termination模式（第5章）的思想来停止多个Pipe实例所共用的 线程池实例。
+     * 线程池停止标志。
+     * 每个ExecutorService实例对应唯一的一个TerminationToken实例。
+     * 这里使用了Two-phase Termination模式（第5章）的思想来停止多个Pipe实例所共用的
+     * 线程池实例。
      *
      * @author Viscent Huang
      */
-    private static class TerminationToken extends GeneralTerminationToken {
-        private final static ConcurrentMap<ExecutorService, TerminationToken> INSTANCES_MAP = new ConcurrentHashMap<ExecutorService, TerminationToken>();
+    private static class TerminationToken extends com.code.pipeline.core.TerminationToken {
+        private final static ConcurrentMap<ExecutorService, TerminationToken> INSTANCES_MAP  = new ConcurrentHashMap<ExecutorService, TerminationToken>();
 
         // 私有构造器
         private TerminationToken() {
@@ -127,16 +106,16 @@ public class ThreadPoolPipeDecorator<IN, OUT> implements Pipe<IN, OUT> {
             this.toShutdown = true;
         }
 
-        static TerminationToken newInstance(ExecutorService executorService) {
-            TerminationToken token = INSTANCES_MAP.get(executorService);
+        static TerminationToken newInstance(ExecutorService executorSerivce) {
+            TerminationToken token = INSTANCES_MAP.get(executorSerivce);
             if (null == token) {
                 token = new TerminationToken();
-                TerminationToken existingToken = INSTANCES_MAP.putIfAbsent(executorService, token);
+                TerminationToken existingToken = INSTANCES_MAP.putIfAbsent(
+                        executorSerivce, token);
                 if (null != existingToken) {
                     token = existingToken;
                 }
             }
-            logger.info(Thread.currentThread().getName() + token);
             return token;
         }
     }
