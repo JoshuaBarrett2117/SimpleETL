@@ -48,12 +48,11 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
 
     @Override
     public void shutdown(long timeout, TimeUnit unit) {
-        Pipe<?, ?> pipe;
 
-        while (null != (pipe = pipes.poll())) {
-            pipe.shutdown(timeout, unit);
+        LinkedList<Pipe<?, ?>> pipesList = (LinkedList<Pipe<?, ?>>) pipes;
+        for (Pipe<?, ?> pipe : pipesList) {
+            pipe.shutdown(timeout,unit);
         }
-
         helperExecutor.shutdown();
 
     }
@@ -68,10 +67,8 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
         addPipe(new WorkerThreadPipeDecorator<INPUT, OUTPUT>(delegate, workerCount));
     }
 
-    public <INPUT, OUTPUT> void addAsThreadPoolBasedPipe(
-            Pipe<INPUT, OUTPUT> delegate, ExecutorService executorSerivce) {
-        addPipe(new ThreadPoolPipeDecorator<INPUT, OUTPUT>(delegate,
-                executorSerivce));
+    public <INPUT, OUTPUT> void addAsThreadPoolBasedPipe(Pipe<INPUT, OUTPUT> delegate, ExecutorService executorSerivce) {
+        addPipe(new ThreadPoolPipeDecorator<INPUT, OUTPUT>(delegate, executorSerivce));
     }
 
     @Override
@@ -113,7 +110,6 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
                 logger.error("Failed to init pipe", e);
             }
         }
-
     }
 
     public PipeContext newDefaultPipelineContext() {

@@ -1,7 +1,5 @@
 package com.code.pipeline.core;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * 文件名称: IWorker.java
  * 修订记录：
@@ -12,8 +10,6 @@ import java.util.concurrent.TimeUnit;
  *
  * @author liufei
  */
-public interface IWorker<IN, OUT> {
+public interface ITransformerWorker<IN, OUT> extends Worker {
     OUT doRun(IN in) throws PipeException;
-
-    void shutdown(long timeout, TimeUnit unit);
 }

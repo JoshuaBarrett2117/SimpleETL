@@ -13,10 +13,6 @@ http://www.broadview.com.cn/38245
 
 package com.code.pipeline.core;
 
-import com.hankcs.hanlp.corpus.document.sentence.word.IWord;
-
-import java.util.concurrent.TimeUnit;
-
 /**
  * Pipe的抽象实现类。 该类会调用其子类实现的doProcess方法对输入元素进行处理。并将相应的输出作为 下一个Pipe实例的输入。
  *
@@ -25,10 +21,10 @@ import java.util.concurrent.TimeUnit;
  * @author Viscent Huang
  */
 public abstract class AbstractSingleWorkerPipe<IN, OUT> extends AbstractPipe<IN, OUT> {
-    private IWorker<IN, OUT> worker;
+    private ITransformerWorker<IN, OUT> worker;
 
 
-    public AbstractSingleWorkerPipe(String name, IWorker<IN, OUT> worker) {
+    public AbstractSingleWorkerPipe(String name, ITransformerWorker<IN, OUT> worker) {
         super(name);
         this.worker = worker;
     }

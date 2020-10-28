@@ -17,9 +17,9 @@ import org.apache.log4j.Logger;
 
 /**
  * 可停止的抽象线程。
- * 
+ * <p>
  * 模式角色：Two-phaseTermination.AbstractTerminatableThread
- * 
+ *
  * @author Viscent Huang
  */
 public abstract class AbstractTerminatableThread extends Thread
@@ -35,9 +35,7 @@ public abstract class AbstractTerminatableThread extends Thread
     }
 
     /**
-     * 
-     * @param terminationToken
-     *            线程间共享的线程终止标志实例
+     * @param terminationToken 线程间共享的线程终止标志实例
      */
     public AbstractTerminatableThread(TerminationToken terminationToken) {
         this.terminationToken = terminationToken;
@@ -45,15 +43,24 @@ public abstract class AbstractTerminatableThread extends Thread
     }
 
     /**
+     * @param terminationToken 线程间共享的线程终止标志实例
+     */
+    public AbstractTerminatableThread(String name, TerminationToken terminationToken) {
+        super(name);
+        this.terminationToken = terminationToken;
+        terminationToken.register(this);
+    }
+
+    /**
      * 留给子类实现其线程处理逻辑。
-     * 
+     *
      * @throws Exception
      */
     protected abstract void doRun() throws Exception;
 
     /**
      * 留给子类实现。用于实现线程停止后的一些清理动作。
-     * 
+     *
      * @param cause
      */
     protected void doCleanup(Exception cause) {
@@ -71,7 +78,7 @@ public abstract class AbstractTerminatableThread extends Thread
     public void run() {
         Exception ex = null;
         try {
-            for (;;) {
+            for (; ; ) {
 
                 // 在执行线程的处理逻辑前先判断线程停止的标志。
                 if (terminationToken.isToShutdown()
@@ -86,7 +93,7 @@ public abstract class AbstractTerminatableThread extends Thread
             ex = e;
             if (e instanceof InterruptedException) {
                 if (DEBUG) {
-                    logger.debug(e);
+                    logger.debug(String.format("[%s]线程被中断", getName()));
                 }
             } else {
                 logger.error("", e);
@@ -107,7 +114,7 @@ public abstract class AbstractTerminatableThread extends Thread
 
     /*
      * 请求停止线程。
-     * 
+     *
      * @see io.github.viscent.mtpattern.tpt.Terminatable#terminate()
      */
     @Override

@@ -15,7 +15,6 @@ package com.code.pipeline.core;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
@@ -23,35 +22,32 @@ import java.util.concurrent.TimeUnit;
 /**
  * Pipe的多工作者抽象类
  *
- * @param <IN>  输入类型
- * @param <OUT> 输出类型
+ * @param <IN>     输入类型
+ * @param <OUT>    工作者输出类型
+ * @param <WORKER> 工作者类型
  * @author liufei
  */
-public abstract class AbstractMultipleWorkerPipe<IN, OUT> extends AbstractPipe<IN, OUT> {
+public abstract class AbstractMultipleWorkerPipe<IN, OUT, WORKER extends AbstractWorker> extends AbstractPipe<IN, OUT> {
     protected final BlockingQueue<IN> workQueue;
-    private final TerminationToken terminationToken = new TerminationToken();
-    private final Set<AbstractTerminatableThread> workerThreads = new HashSet<AbstractTerminatableThread>();
+    protected final WORKER[] workers;
+    protected final TerminationToken terminationToken = new TerminationToken();
+    protected final Set<AbstractTerminatableThread> workerThreads = new HashSet<>();
 
-    public AbstractMultipleWorkerPipe(String name, IWorker<IN, OUT>... workers) {
+    public AbstractMultipleWorkerPipe(String name, WORKER... workers) {
         this(new SynchronousQueue<>(), name, workers);
     }
 
-    public AbstractMultipleWorkerPipe(BlockingQueue<IN> workQueue, String name, IWorker<IN, OUT>... workers) {
+    private AbstractMultipleWorkerPipe(BlockingQueue<IN> workQueue, String name, WORKER... workers) {
         super(name);
         this.workQueue = workQueue;
+        this.workers = workers;
         for (int i = 0; i < workers.length; i++) {
             final int finalIndex = i;
-            workerThreads.add(new AbstractTerminatableThread(terminationToken) {
+            workerThreads.add(new AbstractTerminatableThread(workers[finalIndex].getName(), terminationToken) {
                 @Override
                 protected void doRun() throws Exception {
                     try {
-                        IN input = workQueue.take();
-                        OUT out = workers[finalIndex].doRun(input);
-                        if (null != nextPipe) {
-                            if (null != out) {
-                                ((Pipe<OUT, ?>) nextPipe).process(out);
-                            }
-                        }
+                        AbstractMultipleWorkerPipe.this.doRun(workers[finalIndex]);
                     } finally {
                         terminationToken.reservations.decrementAndGet();
                     }
@@ -60,12 +56,13 @@ public abstract class AbstractMultipleWorkerPipe<IN, OUT> extends AbstractPipe<I
         }
     }
 
+    protected abstract void doRun(WORKER worker) throws PipeException, InterruptedException;
+
 
     @Override
-    @SuppressWarnings("unchecked")
     public void process(IN input) throws InterruptedException {
-        workQueue.put(input);
         terminationToken.reservations.incrementAndGet();
+        workQueue.put(input);
     }
 
     @Override
@@ -79,6 +76,9 @@ public abstract class AbstractMultipleWorkerPipe<IN, OUT> extends AbstractPipe<I
     public void shutdown(long timeout, TimeUnit unit) {
         while (terminationToken.reservations.get() > 0) {
 
+        }
+        for (WORKER worker : workers) {
+            worker.shutdown(timeout, unit);
         }
         for (AbstractTerminatableThread thread : workerThreads) {
             thread.terminate();

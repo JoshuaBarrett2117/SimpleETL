@@ -17,37 +17,45 @@ public class MultipleWorkerPipeDemo {
     @Test
     public void test() throws InterruptedException {
         final ThreadPoolExecutor executorSerivce =
-                new ThreadPoolExecutor(1, Runtime.getRuntime().availableProcessors() * 2,
+                new ThreadPoolExecutor(1, 3,
                         60, TimeUnit.MINUTES,
                         new SynchronousQueue<Runnable>(),
                         new ThreadPoolExecutor.CallerRunsPolicy());
 
         final SimplePipeline<String, String> pipeline =
                 new SimplePipeline<String, String>("pipeline");
-        Pipe<String, String> pipe = new AbstractMultipleWorkerPipe<String, String>("pipe1", newWorker("pipe1-1")
+        Pipe<String, String> pipe = new AbstractTransformerMultipleWorkerPipe<String, String>("pipe1",
+                newWorker("pipe1-1")
                 , newWorker("pipe1-2")
+                , newWorker("pipe1-3")
+                , newWorker("pipe1-4")
         ) {
 
         };
 
-        pipeline.addAsThreadPoolBasedPipe(pipe, executorSerivce);
+        pipeline.addPipe(pipe);
 
-        pipe = new AbstractMultipleWorkerPipe<String, String>("pipe2", newWorker("pipe2-1")
+        pipe = new AbstractTransformerMultipleWorkerPipe<String, String>("pipe2",
+                newWorker("pipe2-1")
                 , newWorker("pipe2-2")
-                ,newWorker("pipe2-3")
+                , newWorker("pipe2-3")
+                , newWorker("pipe2-4")
         ) {
 
         };
 
-        pipeline.addAsThreadPoolBasedPipe(pipe, executorSerivce);
+        pipeline.addPipe(pipe);
 
-        pipe = new AbstractMultipleWorkerPipe<String, String>("pipe3", newWorker("pipe3-1")
-                ,newWorker("pipe3-2")
+        pipe = new AbstractTransformerMultipleWorkerPipe<String, String>("pipe3",
+                newWorker("pipe3-1")
+                , newWorker("pipe3-2")
+                , newWorker("pipe3-3")
+                , newWorker("pipe3-4")
         ) {
 
         };
 
-        pipeline.addAsThreadPoolBasedPipe(pipe, executorSerivce);
+        pipeline.addPipe(pipe);
 
         pipeline.init(pipeline.newDefaultPipelineContext());
 
@@ -67,8 +75,8 @@ public class MultipleWorkerPipeDemo {
     }
 
     @NotNull
-    private IWorker<String, String> newWorker(String s) {
-        return new IWorker<String, String>() {
+    private AbstractTransformerWorker<String, String> newWorker(String s) {
+        return new AbstractTransformerWorker<String, String>(s) {
             @Override
             public String doRun(String input) throws PipeException {
                 String result = input + "->[" + s + "," + Thread.currentThread().getName() + "]";
@@ -79,11 +87,6 @@ public class MultipleWorkerPipeDemo {
                     ;
                 }
                 return result;
-            }
-
-            @Override
-            public void shutdown(long timeout, TimeUnit unit) {
-
             }
         };
     }
