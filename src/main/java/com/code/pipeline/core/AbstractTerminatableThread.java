@@ -93,7 +93,7 @@ public abstract class AbstractTerminatableThread extends Thread
             ex = e;
             if (e instanceof InterruptedException) {
                 if (DEBUG) {
-                    logger.debug(String.format("[%s]线程被中断", getName()));
+                    logger.info(String.format("[%s]线程被中断", getName()));
                 }
             } else {
                 logger.error("", e);

@@ -36,7 +36,8 @@ public class EtlDemo {
 
         Pipe<Void, DataRowModel> inputPipe =
                 new AbstractInputMultipleWorkerPipe<DataRowModel>("inputPipe",
-                        getInputPipeWorker1()) {
+                        getInputPipeWorker1(), getInputPipeWorker2()
+                ) {
                 };
         pipeline.addPipe(inputPipe);
 //
@@ -78,7 +79,9 @@ public class EtlDemo {
                 new OutputAdaptWorker("outputPipeWorker1", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
                 new OutputAdaptWorker("outputPipeWorker2", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
                 new OutputAdaptWorker("outputPipeWorker3", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
-                new OutputAdaptWorker("outputPipeWorker4", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+                new OutputAdaptWorker("outputPipeWorker4", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
+                new OutputAdaptWorker("outputPipeWorker5", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
+                new OutputAdaptWorker("outputPipeWorker6", getDataTarget(), "TJ_GD_STATISTICS_XX2")
         ) {
         };
 
@@ -101,13 +104,14 @@ public class EtlDemo {
     @NotNull
     private InputAdaptWorker getInputPipeWorker1() {
         return new InputAdaptWorker("inputPipeWorker1", getDataSource(),
-//                new IDataSource.Exp("SELECT ZJ_ID,COUNT,TYPE FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_GD_STATISTICS\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_GD_STATISTICS\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 1000) WHERE \"NAVICAT_ROWNUM\" > 0"));
-                new IDataSource.Exp("SELECT ZJ_ID FROM TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026"));
+                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 10000000) WHERE \"NAVICAT_ROWNUM\" > 0"));
+//                new IDataSource.Exp("SELECT ZJ_ID FROM TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026"));
     }
 
     @NotNull
     private InputAdaptWorker getInputPipeWorker2() {
-        return new InputAdaptWorker("inputPipeWorker2", getDataSource(), new IDataSource.Exp("SELECT ZJ_ID,COUNT,TYPE FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_GD_STATISTICS\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_GD_STATISTICS\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 2000) WHERE \"NAVICAT_ROWNUM\" > 1000"));
+        return new InputAdaptWorker("inputPipeWorker2", getDataSource(),
+                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 20000000) WHERE \"NAVICAT_ROWNUM\" > 10000000"));
     }
 
     private IDataSource.Exp getExp() {
