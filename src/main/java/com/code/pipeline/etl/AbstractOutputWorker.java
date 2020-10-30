@@ -44,7 +44,7 @@ public abstract class AbstractOutputWorker<IN> extends AbstractTransformerWorker
         if (dataRowModels.size() > 0) {
             logger.info("[{}]还有剩余数据，数据量[{}]，输出到目标位置", name, dataRowModels.size());
             this.out(dataRowModels);
-            reservations.addAndGet(dataSize);
+            reservations.addAndGet(dataRowModels.size());
             dataRowModels = new ArrayList<>();
         }
     }

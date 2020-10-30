@@ -96,7 +96,7 @@ public class EtlDemo {
         } catch (InterruptedException e) {
             ;
         }
-        pipeline.shutdown(1, TimeUnit.MILLISECONDS);
+        pipeline.shutdown(100, TimeUnit.MILLISECONDS);
         logger.info("结束");
 
     }

@@ -37,6 +37,11 @@ public class InputMultipleWorkerPipe<OUT> extends AbstractMultipleWorkerPipe<Voi
 
     public InputMultipleWorkerPipe(String name, AbstractInputWorker... workers) {
         super(name, workers);
+    }
+
+    @Override
+    public void init(PipeContext pipeCtx) {
+        super.init(pipeCtx);
         cyclicBarrier = new CyclicBarrier(workers.length);
     }
 
