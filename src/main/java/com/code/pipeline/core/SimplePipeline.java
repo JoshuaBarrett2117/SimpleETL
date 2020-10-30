@@ -63,13 +63,13 @@ public class SimplePipeline<T, OUT> extends AbstractPipe<T, OUT> implements Pipe
         pipes.add(pipe);
     }
 
-    public <INPUT, OUTPUT> void addAsWorkerThreadBasedPipe(Pipe<INPUT, OUTPUT> delegate, int workerCount) {
-        addPipe(new WorkerThreadPipeDecorator<INPUT, OUTPUT>(delegate, workerCount));
-    }
-
-    public <INPUT, OUTPUT> void addAsThreadPoolBasedPipe(Pipe<INPUT, OUTPUT> delegate, ExecutorService executorSerivce) {
-        addPipe(new ThreadPoolPipeDecorator<INPUT, OUTPUT>(delegate, executorSerivce));
-    }
+//    public <INPUT, OUTPUT> void addAsWorkerThreadBasedPipe(Pipe<INPUT, OUTPUT> delegate, int workerCount) {
+//        addPipe(new WorkerThreadPipeDecorator<INPUT, OUTPUT>(delegate, workerCount));
+//    }
+//
+//    public <INPUT, OUTPUT> void addAsThreadPoolBasedPipe(Pipe<INPUT, OUTPUT> delegate, ExecutorService executorSerivce) {
+//        addPipe(new ThreadPoolPipeDecorator<INPUT, OUTPUT>(delegate, executorSerivce));
+//    }
 
     @Override
     public void process(T input) throws InterruptedException {

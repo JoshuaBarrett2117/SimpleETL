@@ -1,8 +1,7 @@
 package com.code.pipeline.core;
 
-import java.util.concurrent.TimeUnit;
-
 /**
+ * 基础流程处理工作者
  * @author liufei
  */
 public abstract class AbstractTransformerWorker<IN, OUT> extends AbstractWorker implements ITransformerWorker<IN, OUT> {
@@ -17,8 +16,8 @@ public abstract class AbstractTransformerWorker<IN, OUT> extends AbstractWorker 
     }
 
     @Override
-    public void shutdown(long timeout, TimeUnit unit) {
-
+    public void shutdown() {
+        super.shutdown();
     }
 
 }

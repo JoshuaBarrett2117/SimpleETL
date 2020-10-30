@@ -13,6 +13,8 @@ http://www.broadview.com.cn/38245
 
 package com.code.pipeline.core;
 
+import java.util.concurrent.BlockingQueue;
+
 /**
  * Pipe的多工作者抽象类
  *
@@ -21,6 +23,10 @@ package com.code.pipeline.core;
  * @author liufei
  */
 public abstract class AbstractTransformerMultipleWorkerPipe<IN, OUT> extends AbstractMultipleWorkerPipe<IN, OUT, AbstractTransformerWorker<IN, OUT>> {
+
+    public AbstractTransformerMultipleWorkerPipe(BlockingQueue<IN> workQueue, String name, AbstractTransformerWorker... workers) {
+        super(workQueue, name, workers);
+    }
 
     public AbstractTransformerMultipleWorkerPipe(String name, AbstractTransformerWorker<IN, OUT>... workers) {
         super(name, workers);

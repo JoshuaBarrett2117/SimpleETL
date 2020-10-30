@@ -16,8 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class EtlDemo {
@@ -25,63 +24,64 @@ public class EtlDemo {
 
     @Test
     public void test() throws InterruptedException {
-        final ThreadPoolExecutor executorSerivce =
-                new ThreadPoolExecutor(1, 3,
-                        60, TimeUnit.MINUTES,
-                        new SynchronousQueue<Runnable>(),
-                        new ThreadPoolExecutor.CallerRunsPolicy());
 
         final SimplePipeline<Void, DataRowModel> pipeline =
                 new SimplePipeline<>("pipeline");
 
-        Pipe<Void, DataRowModel> inputPipe =
-                new AbstractInputMultipleWorkerPipe<DataRowModel>("inputPipe",
-                        getInputPipeWorker1(), getInputPipeWorker2()
-                ) {
-                };
+        Pipe<Void, DataRowModel> inputPipe = new InputMultipleWorkerPipe<>(
+                new ArrayBlockingQueue<>(2000),
+                "inputPipe",
+                getInputPipeWorker1(), getInputPipeWorker2(), getInputPipeWorker3()
+        );
         pipeline.addPipe(inputPipe);
-//
-//        Pipe<DataRowModel, DataRowModel> pipe = new AbstractTransformerMultipleWorkerPipe<DataRowModel, DataRowModel>("pipe1",
-//                newWorker("pipe1-1")
-//                , newWorker("pipe1-2")
+        Pipe<DataRowModel, DataRowModel> pipe = new AbstractTransformerMultipleWorkerPipe<DataRowModel, DataRowModel>(
+                new ArrayBlockingQueue<>(2000),
+                "pipe1",
+                newWorker("pipe1-1")
+                , newWorker("pipe1-2")
 //                , newWorker("pipe1-3")
 //                , newWorker("pipe1-4")
-//        ) {
-//
-//        };
-//
-//        pipeline.addPipe(pipe);
-//
-//        pipe = new AbstractTransformerMultipleWorkerPipe<DataRowModel, DataRowModel>("pipe2",
-//                newWorker("pipe2-1")
-//                , newWorker("pipe2-2")
+        ) {
+
+        };
+
+        pipeline.addPipe(pipe);
+
+        pipe = new AbstractTransformerMultipleWorkerPipe<DataRowModel, DataRowModel>(
+                new ArrayBlockingQueue<>(2000),
+                "pipe2",
+                newWorker("pipe2-1")
+                , newWorker("pipe2-2")
 //                , newWorker("pipe2-3")
 //                , newWorker("pipe2-4")
-//        ) {
-//
-//        };
-//
-//        pipeline.addPipe(pipe);
-//
-//        pipe = new AbstractTransformerMultipleWorkerPipe<DataRowModel, DataRowModel>("pipe3",
-//                newWorker("pipe3-1")
-//                , newWorker("pipe3-2")
+        ) {
+
+        };
+
+        pipeline.addPipe(pipe);
+
+        pipe = new AbstractTransformerMultipleWorkerPipe<DataRowModel, DataRowModel>(
+                new ArrayBlockingQueue<>(2000),
+                "pipe3",
+                newWorker("pipe3-1")
+                , newWorker("pipe3-2")
 //                , newWorker("pipe3-3")
 //                , newWorker("pipe3-4")
-//        ) {
-//
-//        };
-//
-//        pipeline.addPipe(pipe);
+        ) {
+
+        };
+
+        pipeline.addPipe(pipe);
 
         Pipe<DataRowModel, Void> outputPipe = new AbstractTransformerMultipleWorkerPipe<DataRowModel, Void>(
+                new ArrayBlockingQueue<>(2000),
                 "outputPipe",
-                new OutputAdaptWorker("outputPipeWorker1", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
-                new OutputAdaptWorker("outputPipeWorker2", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
-                new OutputAdaptWorker("outputPipeWorker3", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
-                new OutputAdaptWorker("outputPipeWorker4", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
-                new OutputAdaptWorker("outputPipeWorker5", getDataTarget(), "TJ_GD_STATISTICS_XX2"),
-                new OutputAdaptWorker("outputPipeWorker6", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+                new OutputAdaptWorker("outputPipeWorker1", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+                , new OutputAdaptWorker("outputPipeWorker2", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+//                , new OutputAdaptWorker("outputPipeWorker3", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+//                , new OutputAdaptWorker("outputPipeWorker4", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+//                , new OutputAdaptWorker("outputPipeWorker5", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+//                , new OutputAdaptWorker("outputPipeWorker6", getDataTarget(), "TJ_GD_STATISTICS_XX2")
         ) {
         };
 
@@ -101,21 +101,20 @@ public class EtlDemo {
 
     }
 
-    @NotNull
     private InputAdaptWorker getInputPipeWorker1() {
         return new InputAdaptWorker("inputPipeWorker1", getDataSource(),
-                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 10000000) WHERE \"NAVICAT_ROWNUM\" > 0"));
+                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 7000000) WHERE \"NAVICAT_ROWNUM\" > 0"));
 //                new IDataSource.Exp("SELECT ZJ_ID FROM TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026"));
     }
 
-    @NotNull
     private InputAdaptWorker getInputPipeWorker2() {
         return new InputAdaptWorker("inputPipeWorker2", getDataSource(),
-                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 20000000) WHERE \"NAVICAT_ROWNUM\" > 10000000"));
+                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 14000000) WHERE \"NAVICAT_ROWNUM\" > 7000000"));
     }
 
-    private IDataSource.Exp getExp() {
-        return new IDataSource.Exp("select * from TJ_GD_STATISTICS_XX");
+    private InputAdaptWorker getInputPipeWorker3() {
+        return new InputAdaptWorker("inputPipeWorker3", getDataSource(),
+                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 30000000) WHERE \"NAVICAT_ROWNUM\" > 14000000"));
     }
 
     private IDataSource getDataSource() {
@@ -145,14 +144,14 @@ public class EtlDemo {
             public DataRowModel doRun(DataRowModel input) throws PipeException {
                 String key = "ZJ_ID";
                 String text = input.getAsString(key);
-//                String result = text + "->[" + s + "," + Thread.currentThread().getName() + "]";
+                String result = text + "->[" + s + "," + Thread.currentThread().getName() + "]";
 //                logger.info(result);
 //                try {
 //                    Thread.sleep(new Random().nextInt(100));
 //                } catch (InterruptedException e) {
 //                    ;
 //                }
-                input.addProperties(key, text);
+                input.addProperties(key, result);
                 return input;
             }
         };

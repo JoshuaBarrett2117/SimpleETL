@@ -14,33 +14,54 @@ http://www.broadview.com.cn/38245
 package com.code.pipeline.core;
 
 import com.code.pipeline.etl.AbstractInputWorker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 /**
- * Pipe的多工作者抽象类
+ * Pipe的多输入工作者抽象类
  *
  * @param <OUT> 输出类型
  * @author liufei
  */
-public abstract class AbstractInputMultipleWorkerPipe<OUT> extends AbstractMultipleWorkerPipe<Void, OUT, AbstractInputWorker<OUT>> {
+public class InputMultipleWorkerPipe<OUT> extends AbstractMultipleWorkerPipe<Void, OUT, AbstractInputWorker<OUT>> {
+    private static final Logger logger = LoggerFactory.getLogger(InputMultipleWorkerPipe.class);
+    private CyclicBarrier cyclicBarrier;
 
+    public InputMultipleWorkerPipe(BlockingQueue<Void> workQueue, String name, AbstractInputWorker<OUT>... workers) {
+        super(workQueue, name, workers);
+    }
 
-    public AbstractInputMultipleWorkerPipe(String name, AbstractInputWorker... workers) {
+    public InputMultipleWorkerPipe(String name, AbstractInputWorker... workers) {
         super(name, workers);
+        cyclicBarrier = new CyclicBarrier(workers.length);
     }
 
     @Override
     protected void doRun(AbstractInputWorker<OUT> worker) throws PipeException, InterruptedException {
+        int count = 0;
         if (null != nextPipe) {
             if (null != worker) {
                 while (worker.hasNext()) {
                     ((Pipe<OUT, ?>) nextPipe).process(worker.next());
+                    count++;
                 }
             }
+        }
+        try {
+            //设置栅栏，当所有工作者任务都完成时，通过栅栏
+            logger.info("[{}]数据抽取完成，共[{}]条，等待主线程中断", worker.getName(), count);
+            cyclicBarrier.await();
+        } catch (BrokenBarrierException e) {
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public void process(Void input) throws InterruptedException {
-        terminationToken.reservations.incrementAndGet();
+        terminationToken.reservations.addAndGet(workers.length);
     }
 }

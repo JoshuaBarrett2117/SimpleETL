@@ -13,7 +13,8 @@ http://www.broadview.com.cn/38245
 
 package com.code.pipeline.core;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 可停止的抽象线程。
@@ -24,7 +25,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractTerminatableThread extends Thread
         implements Terminatable {
-    final static Logger logger = Logger.getLogger(AbstractTerminatableThread.class);
+    final static Logger logger = LoggerFactory.getLogger(AbstractTerminatableThread.class);
     private final boolean DEBUG = true;
 
     // 模式角色：Two-phaseTermination.TerminationToken
@@ -79,10 +80,8 @@ public abstract class AbstractTerminatableThread extends Thread
         Exception ex = null;
         try {
             for (; ; ) {
-
                 // 在执行线程的处理逻辑前先判断线程停止的标志。
-                if (terminationToken.isToShutdown()
-                        && terminationToken.reservations.get() <= 0) {
+                if (terminationToken.isToShutdown() && terminationToken.reservations.get() <= 0) {
                     break;
                 }
                 doRun();
@@ -92,9 +91,7 @@ public abstract class AbstractTerminatableThread extends Thread
             // 使得线程能够响应interrupt调用而退出
             ex = e;
             if (e instanceof InterruptedException) {
-                if (DEBUG) {
-                    logger.info(String.format("[%s]线程被中断", getName()));
-                }
+                logger.info(String.format("[%s]线程被中断", getName()));
             } else {
                 logger.error("", e);
             }
@@ -102,8 +99,10 @@ public abstract class AbstractTerminatableThread extends Thread
             try {
                 doCleanup(ex);
             } finally {
+                //关掉同组的其他线程，会触发一次terminate，所以terminate方法可能会被执行多次
                 terminationToken.notifyThreadTermination(this);
             }
+            logger.info(String.format("[%s]线程结束", getName()));
         }
     }
 
@@ -123,21 +122,10 @@ public abstract class AbstractTerminatableThread extends Thread
         try {
             doTerminiate();
         } finally {
-
             // 若无待处理的任务，则试图强制终止线程
             if (terminationToken.reservations.get() <= 0) {
+                logger.info("[{}]线程无待处理的任务，强制中断线程", getName());
                 super.interrupt();
-            }
-        }
-    }
-
-    public void terminate(boolean waitUtilThreadTerminated) {
-        terminate();
-        if (waitUtilThreadTerminated) {
-            try {
-                this.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
             }
         }
     }

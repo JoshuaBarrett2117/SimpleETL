@@ -1,7 +1,5 @@
 package com.code.pipeline.core;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * 文件名称: IWorker.java
  * 修订记录：
@@ -15,5 +13,5 @@ import java.util.concurrent.TimeUnit;
 public interface Worker {
     void init();
 
-    void shutdown(long timeout, TimeUnit unit);
+    void shutdown();
 }

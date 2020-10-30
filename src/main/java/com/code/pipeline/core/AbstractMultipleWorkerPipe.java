@@ -30,27 +30,32 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractMultipleWorkerPipe<IN, OUT, WORKER extends AbstractWorker> extends AbstractPipe<IN, OUT> {
     protected final BlockingQueue<IN> workQueue;
     protected final WORKER[] workers;
-    protected final TerminationToken terminationToken = new TerminationToken();
+    protected final TerminationToken terminationToken = new TerminationToken(false);
     protected final Set<AbstractTerminatableThread> workerThreads = new HashSet<>();
 
     public AbstractMultipleWorkerPipe(String name, WORKER... workers) {
         this(new SynchronousQueue<>(), name, workers);
     }
 
-    private AbstractMultipleWorkerPipe(BlockingQueue<IN> workQueue, String name, WORKER... workers) {
+    public AbstractMultipleWorkerPipe(BlockingQueue<IN> workQueue, String name, WORKER... workers) {
         super(name);
         this.workQueue = workQueue;
         this.workers = workers;
         for (int i = 0; i < workers.length; i++) {
-            final int finalIndex = i;
-            workerThreads.add(new AbstractTerminatableThread(workers[finalIndex].getName(), terminationToken) {
+            WORKER worker = workers[i];
+            workerThreads.add(new AbstractTerminatableThread(workers[i].getName(), terminationToken) {
                 @Override
                 protected void doRun() throws Exception {
                     try {
-                        AbstractMultipleWorkerPipe.this.doRun(workers[finalIndex]);
+                        AbstractMultipleWorkerPipe.this.doRun(worker);
                     } finally {
                         terminationToken.reservations.decrementAndGet();
                     }
+                }
+
+                @Override
+                protected void doTerminiate() {
+                    worker.shutdown();
                 }
             });
         }
@@ -62,7 +67,12 @@ public abstract class AbstractMultipleWorkerPipe<IN, OUT, WORKER extends Abstrac
     @Override
     public void process(IN input) throws InterruptedException {
         terminationToken.reservations.incrementAndGet();
-        workQueue.put(input);
+        try {
+            workQueue.put(input);
+        } catch (InterruptedException e) {
+            terminationToken.reservations.decrementAndGet();
+            throw e;
+        }
     }
 
     @Override
@@ -77,13 +87,11 @@ public abstract class AbstractMultipleWorkerPipe<IN, OUT, WORKER extends Abstrac
         while (terminationToken.reservations.get() > 0) {
 
         }
-        for (WORKER worker : workers) {
-            worker.shutdown(timeout, unit);
-        }
+        //必须等所有工作者线程执行完毕
         for (AbstractTerminatableThread thread : workerThreads) {
             thread.terminate();
             try {
-                thread.join(TimeUnit.MILLISECONDS.convert(timeout, unit));
+                thread.join();
             } catch (InterruptedException e) {
             }
         }

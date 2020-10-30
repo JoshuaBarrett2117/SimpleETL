@@ -1,8 +1,6 @@
 package com.code.pipeline.etl;
 
-import com.code.common.dao.core.model.DataRowModel;
 import com.code.pipeline.core.AbstractTransformerWorker;
-import com.code.pipeline.core.AbstractWorker;
 import com.code.pipeline.core.PipeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -34,7 +30,7 @@ public abstract class AbstractOutputWorker<IN> extends AbstractTransformerWorker
     private static final Timer timer = new Timer();
 
     static {
-        timer.schedule(new CalcTimeTask(reservations, System.currentTimeMillis()), 1000, 1000);
+        timer.schedule(new CalcTimeTask(reservations, System.currentTimeMillis()), 100, 1000);
     }
 
     public AbstractOutputWorker(String name) {
@@ -43,12 +39,13 @@ public abstract class AbstractOutputWorker<IN> extends AbstractTransformerWorker
     }
 
     @Override
-    public void shutdown(long timeout, TimeUnit unit) {
-        super.shutdown(timeout, unit);
+    public void shutdown() {
+        super.shutdown();
         if (dataRowModels.size() > 0) {
-            long start = System.currentTimeMillis();
+            logger.info("[{}]还有剩余数据，数据量[{}]，输出到目标位置", name, dataRowModels.size());
             this.out(dataRowModels);
             reservations.addAndGet(dataSize);
+            dataRowModels = new ArrayList<>();
         }
     }
 
@@ -56,7 +53,7 @@ public abstract class AbstractOutputWorker<IN> extends AbstractTransformerWorker
     @Override
     public Void doRun(IN input) throws PipeException {
         dataRowModels.add(input);
-        if (dataRowModels.size() > dataSize) {
+        if (dataRowModels.size() == dataSize) {
             this.out(dataRowModels);
             reservations.addAndGet(dataSize);
             dataRowModels = new ArrayList<>(dataSize);
@@ -80,7 +77,8 @@ public abstract class AbstractOutputWorker<IN> extends AbstractTransformerWorker
         @Override
         public void run() {
             if (logger.isInfoEnabled()) {
-                logger.info("写入速度{}条/s", ((double) reservations.get()) / (System.currentTimeMillis() - start) * 1000f);
+                long o = reservations.get();
+                logger.info("已写入{}条数据，写入速度{}条/s", o, ((double) o) / (System.currentTimeMillis() - start) * 1000f);
             }
         }
     }
