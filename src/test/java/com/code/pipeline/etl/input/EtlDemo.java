@@ -23,7 +23,7 @@ public class EtlDemo {
     private static final Logger logger = LoggerFactory.getLogger(EtlDemo.class);
 
     @Test
-    public void test() throws InterruptedException {
+    public void  test() throws InterruptedException {
 
         final SimplePipeline<Void, DataRowModel> pipeline =
                 new SimplePipeline<>("pipeline");
@@ -78,10 +78,10 @@ public class EtlDemo {
                 "outputPipe",
                 new OutputAdaptWorker("outputPipeWorker1", getDataTarget(), "TJ_GD_STATISTICS_XX2")
                 , new OutputAdaptWorker("outputPipeWorker2", getDataTarget(), "TJ_GD_STATISTICS_XX2")
-//                , new OutputAdaptWorker("outputPipeWorker3", getDataTarget(), "TJ_GD_STATISTICS_XX2")
-//                , new OutputAdaptWorker("outputPipeWorker4", getDataTarget(), "TJ_GD_STATISTICS_XX2")
-//                , new OutputAdaptWorker("outputPipeWorker5", getDataTarget(), "TJ_GD_STATISTICS_XX2")
-//                , new OutputAdaptWorker("outputPipeWorker6", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+                , new OutputAdaptWorker("outputPipeWorker3", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+                , new OutputAdaptWorker("outputPipeWorker4", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+                , new OutputAdaptWorker("outputPipeWorker5", getDataTarget(), "TJ_GD_STATISTICS_XX2")
+                , new OutputAdaptWorker("outputPipeWorker6", getDataTarget(), "TJ_GD_STATISTICS_XX2")
         ) {
         };
 

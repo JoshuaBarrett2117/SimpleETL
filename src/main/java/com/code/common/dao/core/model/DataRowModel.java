@@ -14,6 +14,7 @@ public class DataRowModel<T> implements Serializable {
     private String id;
     private Map<String, T> properties = new LinkedHashMap<>();
     private DataRowModel metadata;
+    private boolean isLast = false;
 
     public DataRowModel() {
     }
@@ -52,6 +53,10 @@ public class DataRowModel<T> implements Serializable {
 
     public Long getAsLong(String key) {
         return Long.valueOf(this.getAsString(key));
+    }
+
+    public Number getAsNumber(String key) {
+        return (Number) this.get(key);
     }
 
     public <T> T get(String key, Class<T> tClass) {
@@ -101,5 +106,13 @@ public class DataRowModel<T> implements Serializable {
         if (metadata == null) {
             metadata = new DataRowModel();
         }
+    }
+
+    public boolean getIsLast() {
+        return isLast;
+    }
+
+    public void setIsLast(boolean isLast) {
+        this.isLast = isLast;
     }
 }
