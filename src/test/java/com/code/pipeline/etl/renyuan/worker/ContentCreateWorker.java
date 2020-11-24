@@ -1,5 +1,7 @@
 package com.code.pipeline.etl.renyuan.worker;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.code.common.dao.core.model.DataRowModel;
 import com.code.pipeline.core.AbstractTransformerWorker;
 import com.code.pipeline.core.PipeException;
@@ -11,20 +13,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 文件名称: ContentCreateWorker.java
- * 修订记录：
- * No    日期				作者(操作:具体内容)
- * 1.    2020/11/3     		@author(创建:创建文件)
- * ====================================================
- * 类描述：(说明未实现或其它不应生成javadoc的内容)
- *
  * @author liufei
+ * @Description
+ * @Date 2020/11/2 14:07
  */
 public class ContentCreateWorker extends AbstractTransformerWorker<DataRowModel, DataRowModel> {
     private static final String LEFT = "LEFT";
     private static final String RIGHT = "RIGHT";
     private static final String CONTENT = "CONTENT";
     private static final String SFZHM = "SFZHM";
+    private static final String XM = "XM";
     private static final String ID = "ID";
     private static final String CPH = "CPH";
     private static final String JBXX = "JBXX";
@@ -48,8 +46,8 @@ public class ContentCreateWorker extends AbstractTransformerWorker<DataRowModel,
 
     private List<FieldMapper> fieldMappers;
     private List<FieldMapper> jbxxFieldMappers;
-    private Map<String, List<String>> qgxMap;
-    private Map<String, List<String>> rgxMap;
+    private Map<String, List<Map<String, Object>>> qgxMap;
+    private Map<String, List<Map<String, Object>>> rgxMap;
 
     private boolean isInited = false;
 
@@ -65,6 +63,7 @@ public class ContentCreateWorker extends AbstractTransformerWorker<DataRowModel,
 
     @Override
     public DataRowModel doRun(DataRowModel input) throws PipeException {
+        RelationStandarder.standard(input, relationTypeField);
         DataRowModel result = null;
         if (!isInited) {
             initDataRowModel(input);
@@ -78,6 +77,11 @@ public class ContentCreateWorker extends AbstractTransformerWorker<DataRowModel,
         }
         //包装其他字段
         wrapField(input);
+        if (result != null) {
+            result.addProperties("QGX", JSONObject.toJSONString(result.get("QGX"), SerializerFeature.DisableCircularReferenceDetect));
+            result.addProperties("RGX", JSONObject.toJSONString(result.get("RGX"), SerializerFeature.DisableCircularReferenceDetect));
+            result.addProperties("JBXX", JSONObject.toJSONString(result.get("JBXX"), SerializerFeature.DisableCircularReferenceDetect));
+        }
         return result;
     }
 
@@ -123,21 +127,28 @@ public class ContentCreateWorker extends AbstractTransformerWorker<DataRowModel,
         String relationType = input.getAsString(relationTypeField);
         if (qgxList.contains(relationType)) {
             if (qgxMap.containsKey(relationType)) {
-                qgxMap.get(relationType).add(input.getAsString(rightObjectNameField));
+                qgxMap.get(relationType).add(createGx(input));
             } else {
-                List<String> qs = new ArrayList<>();
-                qs.add(input.getAsString(rightObjectNameField));
+                List<Map<String,Object>> qs = new ArrayList<>();
+                qs.add(createGx(input));
                 qgxMap.put(relationType, qs);
             }
         } else {
             if (rgxMap.containsKey(relationType)) {
-                rgxMap.get(relationType).add(input.getAsString(rightObjectNameField));
+                rgxMap.get(relationType).add(createGx(input));
             } else {
-                List<String> qs = new ArrayList<>();
-                qs.add(input.getAsString(rightObjectNameField));
+                List<Map<String,Object>> qs = new ArrayList<>();
+                qs.add(createGx(input));
                 rgxMap.put(relationType, qs);
             }
         }
+    }
+
+    private Map<String, Object> createGx(DataRowModel input) {
+        Map<String, Object> result = new HashMap<>();
+        result.put(XM, input.getAsString(rightObjectNameField));
+        result.put(SFZHM, input.getAsString(rightObjectIdField));
+        return result;
     }
 
     @NotNull

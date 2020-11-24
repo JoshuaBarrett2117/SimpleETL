@@ -80,6 +80,9 @@ public class ExcelFileSource implements IDataSource {
             if (isFirstRowsAreColumns && datas.size() > 0) {
                 columnsName = datas.remove(0);
             }
+            for (int i = 0; i < columnsName.length; i++) {
+                columnsName[i] = columnsName[i].trim();
+            }
             Iterator<String[]> dataIterator = datas.iterator();
             return new ResultIterator(indexIterator, dataIterator, columnsName, columnNames);
         } else {
