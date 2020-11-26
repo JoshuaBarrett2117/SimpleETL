@@ -105,12 +105,13 @@
             <artifactId>poi-ooxml</artifactId>
             <version>3.15</version>
         </dependency>
-        <!--        oracle驱动-->
+        <!-- https://mvnrepository.com/artifact/com.oracle/ojdbc -->
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc7</artifactId>
             <version>12.1.0.2</version>
         </dependency>
+
 
         <!--        test start-->
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->

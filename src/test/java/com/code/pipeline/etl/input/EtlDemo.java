@@ -1,20 +1,27 @@
 package com.code.pipeline.etl.input;
 
+import com.alibaba.fastjson.JSONObject;
 import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.jdbc.operator.Software;
+import com.code.common.utils.StringUtils;
 import com.code.pipeline.core.*;
 import com.code.pipeline.etl.InputAdaptWorker;
 import com.code.pipeline.etl.OutputAdaptWorker;
+import com.code.pipeline.etl.renyuan.worker.IFieldWarp;
 import com.code.tooltrans.common.IDataSource;
 import com.code.tooltrans.common.IDataTarget;
 import com.code.tooltrans.common.RdbDataSource;
 import com.code.tooltrans.common.source.rdb.RdbSource;
 import com.code.tooltrans.common.target.rdb.RdbTarget;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +30,7 @@ public class EtlDemo {
     private static final Logger logger = LoggerFactory.getLogger(EtlDemo.class);
 
     @Test
-    public void  test() throws InterruptedException {
+    public void test() throws InterruptedException {
 
         final SimplePipeline<Void, DataRowModel> pipeline =
                 new SimplePipeline<>("pipeline");
@@ -103,18 +110,18 @@ public class EtlDemo {
 
     private InputAdaptWorker getInputPipeWorker1() {
         return new InputAdaptWorker("inputPipeWorker1", getDataSource(),
-                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 7000000) WHERE \"NAVICAT_ROWNUM\" > 0"));
-//                new IDataSource.Exp("SELECT ZJ_ID FROM TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026"));
+                new IDataSource.Exp("SELECT * FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1117\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1117\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 7000000 and jd is not null) WHERE \"NAVICAT_ROWNUM\" > 0"));
+//                new IDataSource.Exp("SELECT ZJ_ID FROM TJ_T_RH_WZ_DX_DTDLWZ_DI_N1117"));
     }
 
     private InputAdaptWorker getInputPipeWorker2() {
         return new InputAdaptWorker("inputPipeWorker2", getDataSource(),
-                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 14000000) WHERE \"NAVICAT_ROWNUM\" > 7000000"));
+                new IDataSource.Exp("SELECT * FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1117\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1117\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 14000000 and jd is not null) WHERE \"NAVICAT_ROWNUM\" > 7000000"));
     }
 
     private InputAdaptWorker getInputPipeWorker3() {
         return new InputAdaptWorker("inputPipeWorker3", getDataSource(),
-                new IDataSource.Exp("SELECT ZJ_ID FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1026\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 30000000) WHERE \"NAVICAT_ROWNUM\" > 14000000"));
+                new IDataSource.Exp("SELECT * FROM (SELECT \"NAVICAT_TABLE\".*, ROWNUM \"NAVICAT_ROWNUM\" FROM (SELECT \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1117\".*,ROWID \"NAVICAT_ROWID\" FROM \"IOF\".\"TJ_T_RH_WZ_DX_DTDLWZ_DI_N1117\") \"NAVICAT_TABLE\" WHERE ROWNUM <= 30000000 and jd is not null) WHERE \"NAVICAT_ROWNUM\" > 14000000"));
     }
 
     private IDataSource getDataSource() {
@@ -142,17 +149,36 @@ public class EtlDemo {
         return new AbstractTransformerWorker<DataRowModel, DataRowModel>(s) {
             @Override
             public DataRowModel doRun(DataRowModel input) throws PipeException {
-                String key = "ZJ_ID";
-                String text = input.getAsString(key);
-                String result = text + "->[" + s + "," + Thread.currentThread().getName() + "]";
-//                logger.info(result);
-//                try {
-//                    Thread.sleep(new Random().nextInt(100));
-//                } catch (InterruptedException e) {
-//                    ;
-//                }
-                input.addProperties(key, result);
+                String bzdm = input.getAsString("BZDM");
+                String jd = input.getAsString("JD");
+                if (StringUtils.isBlank(jd)) {
+                    String json = getJwd(bzdm);
+                    if (json != null) {
+                        JSONObject response = JSONObject.parseObject(json);
+                        Integer status = response.getInteger("status");
+                        if (status == 0) {
+                            JSONObject result = response.getJSONObject("result");
+                            JSONObject location = result.getJSONObject("location");
+                            input.addProperties("JD", location.getDouble("lng"));
+                            input.addProperties("WD", location.getDouble("lat"));
+                        }
+                    }
+                }
                 return input;
+            }
+
+            private String getJwd(String bzdm) {
+                HttpRequest httpRequest = new HttpRequest();
+                CloseableHttpResponse closeableHttpResponse = null;
+                try {
+                    closeableHttpResponse = httpRequest.get("https://api.map.baidu.com/geocoder/v2/?address=" + bzdm + "&output=json&ak=gQsCAgCrWsuN99ggSIjGn5nO", null);
+                    HttpEntity entity = closeableHttpResponse.getEntity();
+                    String json = EntityUtils.toString(entity);
+                    return json;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
             }
         };
     }
