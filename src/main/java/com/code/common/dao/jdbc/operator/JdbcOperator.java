@@ -90,7 +90,7 @@ public class JdbcOperator {
     }
 
 
-    public void update(String tableName, DataRowModel object) {
+    public void update(String tableName, DataRowModel object, String idField) {
         if (StringUtils.isBlank(object.getId())) {
             throw new IllegalArgumentException("id不允许为空");
         }
@@ -101,7 +101,7 @@ public class JdbcOperator {
             sql.append(key + "=" + properties.get(key) + ",");
         }
         sql.setCharAt(sql.length() - 1, ' ');
-        sql.append("where id = " + object.getId());
+        sql.append("where " + idField + " = " + object.getId());
         executeExp(sql.toString(), null);
     }
 

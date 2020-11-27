@@ -2,6 +2,7 @@ package com.code.tooltrans.common.target.elasticsearch;
 
 import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IDataTarget;
+import com.code.tooltrans.common.target.AbstractTarget;
 import com.google.gson.GsonBuilder;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
@@ -19,7 +20,7 @@ import java.util.Properties;
  * @Description
  * @Date 2020/3/26 11:06
  */
-public class ElasticsearchTarget implements IDataTarget {
+public class ElasticsearchTarget extends AbstractTarget {
     private JestClient client;
 
     public ElasticsearchTarget(Properties properties) {

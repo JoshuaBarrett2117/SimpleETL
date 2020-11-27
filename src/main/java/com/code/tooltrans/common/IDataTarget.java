@@ -14,6 +14,7 @@ public interface IDataTarget {
     boolean save(List<DataRowModel> docs, String indexName);
 
     boolean saveOrUpdate(List<DataRowModel> docs, String indexName);
+    boolean update(List<DataRowModel> docs, String indexName,String idField);
 
     boolean close();
 }

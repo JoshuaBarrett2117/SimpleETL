@@ -3,6 +3,7 @@ package com.code.tooltrans.common.target.text;
 import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.utils.StringUtils;
 import com.code.tooltrans.common.IDataTarget;
+import com.code.tooltrans.common.target.AbstractTarget;
 
 import java.io.*;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
  * @Description
  * @Date 2020/3/31 10:35
  */
-public class CsvTarget implements IDataTarget {
+public class CsvTarget extends AbstractTarget {
     private FileOutputStream fileOutputStream;
     private List<String> columns;
     /**

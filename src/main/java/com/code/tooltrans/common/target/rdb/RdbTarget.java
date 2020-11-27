@@ -5,6 +5,7 @@ import com.code.common.dao.jdbc.operator.JdbcOperator;
 import com.code.common.dao.jdbc.operator.Software;
 import com.code.common.dao.jdbc.util.DbUtil;
 import com.code.tooltrans.common.IDataTarget;
+import com.code.tooltrans.common.target.AbstractTarget;
 
 import java.sql.Connection;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
  * @Description
  * @Date 2020/3/26 10:09
  */
-public class RdbTarget implements IDataTarget {
+public class RdbTarget extends AbstractTarget {
     private Connection connection;
     private Software software;
 
@@ -38,6 +39,16 @@ public class RdbTarget implements IDataTarget {
         JdbcOperator operator = new JdbcOperator(connection, software);
         for (DataRowModel doc : docs) {
             operator.saveOrUpdate(indexName, doc);
+        }
+        operator.commit();
+        return true;
+    }
+
+    @Override
+    public boolean update(List<DataRowModel> docs, String indexName, String idField) {
+        JdbcOperator operator = new JdbcOperator(connection, software);
+        for (DataRowModel doc : docs) {
+            operator.update(indexName, doc, idField);
         }
         operator.commit();
         return true;

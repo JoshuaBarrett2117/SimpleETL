@@ -136,7 +136,7 @@
         </dependency>
 
         <dependency>
-            <artifactId>business-model</artifactId>
+            <artifactId>geographic-location-model</artifactId>
             <groupId>com.code.model</groupId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -146,11 +146,13 @@
             <artifactId>gsjdbc4</artifactId>
             <version>2.0</version>
         </dependency>
+
         <dependency>
             <groupId>gsjdbc200</groupId>
             <artifactId>gsjdbc200</artifactId>
             <version>2.0</version>
         </dependency>
+
     </dependencies>
 
 

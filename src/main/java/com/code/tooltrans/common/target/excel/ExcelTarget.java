@@ -2,6 +2,7 @@ package com.code.tooltrans.common.target.excel;
 
 import com.code.common.dao.core.model.DataRowModel;
 import com.code.tooltrans.common.IDataTarget;
+import com.code.tooltrans.common.target.AbstractTarget;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author qiaoshuai
  * @Description: TODO
  */
-public class ExcelTarget implements IDataTarget {
+public class ExcelTarget extends AbstractTarget {
     private List<String> columns;
     private FileOutputStream fileOutputStream;
     private SXSSFWorkbook wb;

@@ -2,7 +2,6 @@ package com.code.tooltrans.common.target;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.common.dao.core.model.DataRowModel;
-import com.code.tooltrans.common.IDataTarget;
 
 import java.util.List;
 
@@ -11,7 +10,7 @@ import java.util.List;
  * @Description
  * @Date 2020/3/26 11:06
  */
-public class ConsoleTarget implements IDataTarget {
+public class ConsoleTarget extends AbstractTarget {
     @Override
     public boolean save(List<DataRowModel> docs, String indexName) {
         for (DataRowModel doc : docs) {
