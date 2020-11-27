@@ -1,4 +1,4 @@
-package com.code.pipeline.etl.input;
+package com.code.test;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.common.dao.core.model.DataRowModel;
@@ -16,8 +16,6 @@ import com.code.tooltrans.common.target.rdb.RdbTarget;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +23,15 @@ import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class EtlDemo {
-    private static final Logger logger = LoggerFactory.getLogger(EtlDemo.class);
+public class JwqDemo {
+    private static final Logger logger = LoggerFactory.getLogger(JwqDemo.class);
     HttpRequest httpRequest = new HttpRequest();
 
-    @Test
-    public void test() throws InterruptedException {
+    public static void main(String[] args) {
+        new JwqDemo().test();
+    }
+
+    public void test() {
 
         final SimplePipeline<Void, DataRowModel> pipeline =
                 new SimplePipeline<>("pipeline");
@@ -129,7 +130,6 @@ public class EtlDemo {
         return new RdbTarget(dataSource.getConnection(), new Software("oracle"));
     }
 
-    @NotNull
     private AbstractTransformerWorker<DataRowModel, DataRowModel> newWorker(String s) {
         return new AbstractTransformerWorker<DataRowModel, DataRowModel>(s) {
             @Override
