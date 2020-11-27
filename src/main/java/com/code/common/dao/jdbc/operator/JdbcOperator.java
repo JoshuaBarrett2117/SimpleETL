@@ -94,15 +94,27 @@ public class JdbcOperator {
         if (StringUtils.isBlank(object.getId())) {
             throw new IllegalArgumentException("id不允许为空");
         }
+
         StringBuffer sql = new StringBuffer("update " + tableName + " set ");
         Map<String, Object> properties = object.getProperties();
         Set<String> keys = properties.keySet();
+        ExpParam param = new ExpParam();
         for (String key : keys) {
-            sql.append(key + "=" + properties.get(key) + ",");
+            sql.append(key + "= :" + key + ",");
+            Object value = properties.get(key);
+            param.addParam(key, value);
         }
         sql.setCharAt(sql.length() - 1, ' ');
-        sql.append("where " + idField + " = " + object.getId());
-        executeExp(sql.toString(), null);
+        sql.append("where " + idField + " = :" + idField);
+        param.addParam(idField,object.getId());
+        executeExp(sql.toString(), Arrays.asList(param).iterator());
+    }
+
+    private Object getUpdateValue(Object o) {
+        if (o instanceof String) {
+            return "'" + o + "'";
+        }
+        return o;
     }
 
     public void save(String tableName, DataRowModel object) {

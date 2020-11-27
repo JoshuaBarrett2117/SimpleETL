@@ -122,15 +122,20 @@ public class JwqDemo {
         return new AbstractTransformerWorker<DataRowModel, DataRowModel>(s) {
             @Override
             public DataRowModel doRun(DataRowModel input) throws PipeException {
-                String jd = input.getAsString(properties.getProperty("jd_field"));
-                String wd = input.getAsString(properties.getProperty("wd_field"));
-                if (StringUtils.isBlank(jd) || StringUtils.isBlank(wd)) {
+                DataRowModel updateRow = new DataRowModel();
+                Number jdField = input.getAsNumber(properties.getProperty("jd_field"));
+                Number wdField = input.getAsNumber(properties.getProperty("wd_field"));
+                if (jdField == null || wdField == null) {
                     return null;
                 }
-                PoliceUnitVo vo = service.computeByJWD(jd, wd, properties.getProperty("level"));
-                input.addProperties(properties.getProperty("jwcmc_field"), vo.getUnitName());
-                input.addProperties(properties.getProperty("jwcdm_field"), vo.getUnitId());
-                return input;
+                PoliceUnitVo vo = service.computeByJWD(jdField.toString(), wdField.toString(), properties.getProperty("level"));
+                if (vo == null) {
+                    return null;
+                }
+                updateRow.setId(input.getAsString(properties.getProperty("id_field")));
+                updateRow.addProperties(properties.getProperty("jwcmc_field"), vo.getUnitName());
+                updateRow.addProperties(properties.getProperty("jwcdm_field"), vo.getUnitId());
+                return updateRow;
             }
         };
     }
