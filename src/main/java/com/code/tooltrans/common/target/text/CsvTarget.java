@@ -21,7 +21,7 @@ public class CsvTarget extends AbstractTarget {
      * {@link java.nio.charset.Charset charset}
      */
     private String charsetName;
-    private Boolean isOutHead = false;
+    private static volatile boolean isOutHead = false;
 
     public CsvTarget(FileOutputStream fileOutputStream, List<String> columns) {
         this.columns = columns;
@@ -32,7 +32,7 @@ public class CsvTarget extends AbstractTarget {
     public CsvTarget(String path, List<String> columns) {
         this.columns = columns;
         try {
-            this.fileOutputStream = new FileOutputStream(new File(path));
+            this.fileOutputStream = new FileOutputStream(new File(path),true);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -42,7 +42,7 @@ public class CsvTarget extends AbstractTarget {
     public CsvTarget(File file, List<String> columns) {
         this.columns = columns;
         try {
-            this.fileOutputStream = new FileOutputStream(file);
+            this.fileOutputStream = new FileOutputStream(file,true);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -64,21 +64,16 @@ public class CsvTarget extends AbstractTarget {
         try {
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream, StringUtils.isNotBlank(charsetName) ? charsetName : "utf-8"));
             if (!isOutHead) {
-                synchronized (isOutHead) {
-                    if (!isOutHead) {
-                        for (int i = 0; i < columns.size(); i++) {
-                            bufferedWriter.write(columns.get(i));
-                            if (i < columns.size() - 1) {
-                                bufferedWriter.write(",");
-                            }
-                        }
-                        bufferedWriter.write("\r\n");
-                        isOutHead = true;
-                    } else {
-                        createRow(docs, bufferedWriter);
+                for (int i = 0; i < columns.size(); i++) {
+                    bufferedWriter.write(columns.get(i));
+                    if (i < columns.size() - 1) {
+                        bufferedWriter.write(",");
                     }
                 }
-            } else {
+                bufferedWriter.write("\r\n");
+                isOutHead = true;
+            }
+            if (isOutHead) {
                 createRow(docs, bufferedWriter);
             }
             bufferedWriter.flush();
