@@ -32,7 +32,7 @@ public class CsvTarget extends AbstractTarget {
     public CsvTarget(String path, List<String> columns) {
         this.columns = columns;
         try {
-            this.fileOutputStream = new FileOutputStream(new File(path),true);
+            this.fileOutputStream = new FileOutputStream(new File(path), true);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -42,7 +42,7 @@ public class CsvTarget extends AbstractTarget {
     public CsvTarget(File file, List<String> columns) {
         this.columns = columns;
         try {
-            this.fileOutputStream = new FileOutputStream(file,true);
+            this.fileOutputStream = new FileOutputStream(file, true);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -50,20 +50,11 @@ public class CsvTarget extends AbstractTarget {
     }
 
     private void init() {
-        byte[] uft8bom = {(byte) 0xef, (byte) 0xbb, (byte) 0xbf};
-        try {
-            fileOutputStream.write(uft8bom);
-        } catch (IOException e) {
-            throw new RuntimeException("写入bom失败");
-        }
-    }
-
-    @Override
-    public boolean save(List<DataRowModel> docs, String indexName) {
-        BufferedWriter bufferedWriter = null;
-        try {
-            bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream, StringUtils.isNotBlank(charsetName) ? charsetName : "utf-8"));
-            if (!isOutHead) {
+        if (!isOutHead) {
+            byte[] uft8bom = {(byte) 0xef, (byte) 0xbb, (byte) 0xbf};
+            try {
+                fileOutputStream.write(uft8bom);
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream, StringUtils.isNotBlank(charsetName) ? charsetName : "utf-8"));
                 for (int i = 0; i < columns.size(); i++) {
                     bufferedWriter.write(columns.get(i));
                     if (i < columns.size() - 1) {
@@ -71,11 +62,21 @@ public class CsvTarget extends AbstractTarget {
                     }
                 }
                 bufferedWriter.write("\r\n");
-                isOutHead = true;
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                throw new RuntimeException("写入bom失败");
             }
-            if (isOutHead) {
-                createRow(docs, bufferedWriter);
-            }
+            isOutHead = true;
+        }
+
+    }
+
+    @Override
+    public boolean save(List<DataRowModel> docs, String indexName) {
+        BufferedWriter bufferedWriter = null;
+        try {
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream, StringUtils.isNotBlank(charsetName) ? charsetName : "utf-8"));
+            createRow(docs, bufferedWriter);
             bufferedWriter.flush();
         } catch (IOException e) {
             try {

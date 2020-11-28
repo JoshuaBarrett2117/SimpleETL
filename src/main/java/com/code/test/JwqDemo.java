@@ -133,8 +133,7 @@ public class JwqDemo {
         IPoliceUnitService service = new PoliceUnitServiceImpl();
         return new AbstractTransformerWorker<DataRowModel, DataRowModel>(s) {
             @Override
-            public DataRowModel doRun(DataRowModel input) throws PipeException {
-                DataRowModel updateRow = new DataRowModel();
+            public DataRowModel doRun(DataRowModel input)  {
                 Object jdField = input.get(properties.getProperty("jd_field"));
                 Object wdField = input.get(properties.getProperty("wd_field"));
                 if (jdField == null || wdField == null) {
@@ -147,11 +146,9 @@ public class JwqDemo {
                     return null;
                 }
                 logger.trace("映射成功：[{}],[{}]", vo.getUnitId(), vo.getUnitName());
-                updateRow.setId(input.getAsString(properties.getProperty("id_field")));
-                updateRow.addProperties(properties.getProperty("jwcmc_field"), vo.getUnitName());
-                updateRow.addProperties(properties.getProperty("jwcdm_field"), vo.getUnitId());
-                updateRow.addProperties(properties.getProperty("id_field"), updateRow.getId());
-                return updateRow;
+                input.addProperties(properties.getProperty("jwcmc_field"), vo.getUnitName());
+                input.addProperties(properties.getProperty("jwcdm_field"), vo.getUnitId());
+                return input;
             }
 
             private String getNumberStr(String toString) {
