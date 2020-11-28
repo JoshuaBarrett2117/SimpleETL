@@ -72,8 +72,9 @@ public abstract class AbstractOutputWorker<IN> extends AbstractTransformerWorker
         @Override
         public void run() {
             if (logger.isInfoEnabled()) {
-                long o = reservations.get();
-                logger.info("已写入{}条数据，写入速度{}条/s", o, ((double) o) / (System.currentTimeMillis() - start) * 1000f);
+                long count = reservations.get();
+                long cost = System.currentTimeMillis() - start;
+                logger.debug("已耗费[{}]s,已写入[{}]条数据，写入速度[{}]条/s", cost, count, ((double) count) / cost * 1000f);
             }
         }
     }

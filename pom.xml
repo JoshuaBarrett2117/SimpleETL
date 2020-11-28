@@ -142,17 +142,10 @@
         </dependency>
 
         <dependency>
-            <groupId>gsjdbc4</groupId>
-            <artifactId>gsjdbc4</artifactId>
-            <version>2.0</version>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.18</version>
         </dependency>
-
-        <dependency>
-            <groupId>gsjdbc200</groupId>
-            <artifactId>gsjdbc200</artifactId>
-            <version>2.0</version>
-        </dependency>
-
     </dependencies>
 
 
