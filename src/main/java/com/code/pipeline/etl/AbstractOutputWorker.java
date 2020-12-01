@@ -74,7 +74,7 @@ public abstract class AbstractOutputWorker<IN> extends AbstractTransformerWorker
             if (logger.isInfoEnabled()) {
                 long count = reservations.get();
                 long cost = System.currentTimeMillis() - start;
-                logger.debug("已耗费[{}]s,已写入[{}]条数据，写入速度[{}]条/s", cost, count, ((double) count) / cost * 1000f);
+                logger.debug("已耗费[{}]s,已写入[{}]条数据，写入速度[{}]条/s", cost/1000, count, ((double) count) / cost * 1000f);
             }
         }
     }
