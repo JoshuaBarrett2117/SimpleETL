@@ -13,6 +13,9 @@ http://www.broadview.com.cn/38245
 
 package com.code.pipeline.core;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -42,5 +45,19 @@ public abstract class AbstractTransformerMultipleWorkerPipe<IN, OUT> extends Abs
             }
         }
     }
+
+    public static <T> T[] createArray(Factory<T> factory, Class<T> clazz, int count) {
+        List<T> ts = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ts.add(factory.get(i));
+        }
+        T[] o = (T[]) Array.newInstance(clazz, count);
+        return ts.toArray(o);
+    }
+
+    public interface Factory<T> {
+        T get(int index);
+    }
+
 
 }
