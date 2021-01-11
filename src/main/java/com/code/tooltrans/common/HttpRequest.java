@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Map;
 
 /**
@@ -37,11 +38,23 @@ public class HttpRequest {
     public final static String POST = "POST";
 
     private CloseableHttpClient client;
+    private RequestConfig requestConfig;
     private CookieStore cookieStore;
+
 
     public HttpRequest() {
         this.cookieStore = new BasicCookieStore();
         this.client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
+        requestConfig = RequestConfig.custom()
+                // 设置连接超时时间(单位毫秒)
+                .setConnectTimeout(60000)
+//                .setProxy(new HttpHost("127.0.0.1", 8888, "http"))
+                // 设置请求超时时间(单位毫秒)
+                .setConnectionRequestTimeout(60000)
+                // socket读写超时时间(单位毫秒)
+                .setSocketTimeout(60000).setProxy(HttpHost.create("http://127.0.0.1:1080"))
+                // 设置是否允许重定向(默认为true)
+                .setRedirectsEnabled(true).build();
     }
 
     /**
@@ -61,16 +74,6 @@ public class HttpRequest {
         // 响应模型
         CloseableHttpResponse response = null;
         // 配置信息
-        RequestConfig requestConfig = RequestConfig.custom()
-                // 设置连接超时时间(单位毫秒)
-                .setConnectTimeout(60000)
-//                .setProxy(new HttpHost("127.0.0.1", 8888, "http"))
-                // 设置请求超时时间(单位毫秒)
-                .setConnectionRequestTimeout(60000)
-                // socket读写超时时间(单位毫秒)
-                .setSocketTimeout(60000).setProxy(HttpHost.create("http://127.0.0.1:1080"))
-                // 设置是否允许重定向(默认为true)
-                .setRedirectsEnabled(true).build();
 
         // 将上面的配置信息 运用到这个Get请求里
         httpGet.setConfig(requestConfig);
@@ -104,18 +107,6 @@ public class HttpRequest {
         HttpPost httpPost = new HttpPost(urlStr);
         httpPost.setEntity(entity);
         httpPost.setHeader("Content-Type", "application/json;charset=utf8");
-        // 配置信息
-        RequestConfig requestConfig = RequestConfig.custom()
-                // 设置连接超时时间(单位毫秒)
-                .setConnectTimeout(5000)
-//                .setProxy(new HttpHost("127.0.0.1", 8888, "http"))
-                // 设置请求超时时间(单位毫秒)
-                .setConnectionRequestTimeout(5000)
-                // socket读写超时时间(单位毫秒)
-                .setSocketTimeout(5000)
-                // 设置是否允许重定向(默认为true)
-                .setRedirectsEnabled(true).build();
-
         // 将上面的配置信息 运用到这个Get请求里
         httpPost.setConfig(requestConfig);
         // 响应模型
