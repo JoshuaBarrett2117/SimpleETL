@@ -1,4 +1,4 @@
-package com.code.pipeline.etl.input;
+package com.code.pipeline.worker.input;
 
 import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.jdbc.operator.Software;
@@ -6,8 +6,8 @@ import com.code.pipeline.core.AbstractTransformerMultipleWorkerPipe;
 import com.code.pipeline.core.InputMultipleWorkerPipe;
 import com.code.pipeline.core.Pipe;
 import com.code.pipeline.core.SimplePipeline;
-import com.code.pipeline.etl.InputAdaptWorker;
-import com.code.pipeline.etl.OutputAdaptWorker;
+import com.code.pipeline.worker.InputAdaptWorker;
+import com.code.pipeline.worker.OutputAdaptWorker;
 import com.code.tooltrans.common.IDataSource;
 import com.code.tooltrans.common.IDataTarget;
 import com.code.tooltrans.common.RdbDataSource;

@@ -13,11 +13,12 @@ http://www.broadview.com.cn/38245
 
 package com.code.pipeline.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Pipe的多工作者抽象类
@@ -28,10 +29,16 @@ import java.util.concurrent.TimeUnit;
  * @author liufei
  */
 public abstract class AbstractMultipleWorkerPipe<IN, OUT, WORKER extends AbstractWorker> extends AbstractPipe<IN, OUT> {
+    final static Logger logger = LoggerFactory.getLogger(AbstractMultipleWorkerPipe.class);
     protected final BlockingQueue<IN> workQueue;
     protected final WORKER[] workers;
     protected final TerminationToken terminationToken = new TerminationToken(false);
     protected final Set<AbstractTerminatableThread> workerThreads = new HashSet<>();
+    protected final ThreadPoolExecutor pool
+            = new ThreadPoolExecutor(5, 10, 100, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(100),
+            (r) -> {
+                return new Thread(r, getName());
+            });
 
     public AbstractMultipleWorkerPipe(String name, WORKER... workers) {
         this(new SynchronousQueue<>(), name, workers);
@@ -55,7 +62,13 @@ public abstract class AbstractMultipleWorkerPipe<IN, OUT, WORKER extends Abstrac
 
                 @Override
                 protected void doTerminiate() {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[{}]准备关闭...", getName());
+                    }
                     worker.shutdown();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[{}]已关闭...", getName());
+                    }
                 }
             });
         }
@@ -78,22 +91,23 @@ public abstract class AbstractMultipleWorkerPipe<IN, OUT, WORKER extends Abstrac
     @Override
     public void init(PipeContext pipeCtx) {
         for (AbstractTerminatableThread thread : workerThreads) {
-            thread.start();
+            pool.execute(thread::run);
         }
     }
 
     @Override
     public void shutdown(long timeout, TimeUnit unit) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[{}]任务，等待所有工作者执行完成", getName());
+        }
         while (terminationToken.reservations.get() > 0) {
-
         }
         //必须等所有工作者线程执行完毕
-        for (AbstractTerminatableThread thread : workerThreads) {
-            thread.terminate();
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-            }
+        pool.shutdown();
+//        while (!pool.isTerminated()) {
+//        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("[{}]任务，所有工作者执行完成", getName());
         }
     }
 }

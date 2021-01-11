@@ -1,4 +1,4 @@
-package com.code.pipeline.etl.renyuan.worker;
+package com.code.pipeline.worker.renyuan.worker;
 
 import java.util.ArrayList;
 import java.util.List;

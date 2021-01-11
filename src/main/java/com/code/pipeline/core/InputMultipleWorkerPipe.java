@@ -13,7 +13,7 @@ http://www.broadview.com.cn/38245
 
 package com.code.pipeline.core;
 
-import com.code.pipeline.etl.AbstractInputWorker;
+import com.code.pipeline.worker.AbstractInputWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

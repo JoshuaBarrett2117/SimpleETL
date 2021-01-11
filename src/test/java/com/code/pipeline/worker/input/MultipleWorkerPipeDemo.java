@@ -1,4 +1,4 @@
-package com.code.pipeline.etl.input;
+package com.code.pipeline.worker.input;
 
 import com.code.pipeline.core.*;
 import org.jetbrains.annotations.NotNull;

@@ -1,4 +1,4 @@
-package com.code.pipeline.etl.input;
+package com.code.pipeline.worker.input;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpEntity;

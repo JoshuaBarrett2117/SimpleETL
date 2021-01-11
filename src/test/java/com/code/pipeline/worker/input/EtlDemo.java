@@ -1,12 +1,12 @@
-package com.code.pipeline.etl.input;
+package com.code.pipeline.worker.input;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.jdbc.operator.Software;
 import com.code.common.utils.StringUtils;
 import com.code.pipeline.core.*;
-import com.code.pipeline.etl.InputAdaptWorker;
-import com.code.pipeline.etl.OutputAdaptWorker;
+import com.code.pipeline.worker.InputAdaptWorker;
+import com.code.pipeline.worker.OutputAdaptWorker;
 import com.code.tooltrans.common.HttpRequest;
 import com.code.tooltrans.common.IDataSource;
 import com.code.tooltrans.common.IDataTarget;

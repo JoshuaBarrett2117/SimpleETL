@@ -1,6 +1,4 @@
-package com.code.pipeline.etl.renyuan.worker;
-
-import com.code.common.dao.core.model.DataRowModel;
+package com.code.pipeline.worker.renyuan.worker;
 
 import java.util.Map;
 

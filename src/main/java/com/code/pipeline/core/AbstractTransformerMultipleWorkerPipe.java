@@ -25,9 +25,10 @@ import java.util.concurrent.BlockingQueue;
  * @param <OUT> 输出类型
  * @author liufei
  */
-public abstract class AbstractTransformerMultipleWorkerPipe<IN, OUT> extends AbstractMultipleWorkerPipe<IN, OUT, AbstractTransformerWorker<IN, OUT>> {
+public abstract class AbstractTransformerMultipleWorkerPipe<IN, OUT>
+        extends AbstractMultipleWorkerPipe<IN, OUT, AbstractTransformerWorker<IN, OUT>> {
 
-    public AbstractTransformerMultipleWorkerPipe(BlockingQueue<IN> workQueue, String name, AbstractTransformerWorker... workers) {
+    public AbstractTransformerMultipleWorkerPipe(BlockingQueue<IN> workQueue, String name, AbstractTransformerWorker<IN, OUT>... workers) {
         super(workQueue, name, workers);
     }
 

@@ -48,4 +48,7 @@ public abstract class AbstractPipe<IN, OUT> implements Pipe<IN, OUT> {
         // 什么也不做
     }
 
+    public String getName() {
+        return name;
+    }
 }

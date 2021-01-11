@@ -1,12 +1,12 @@
-package com.code.pipeline.etl.renyuan;
+package com.code.pipeline.worker.renyuan;
 
 import com.code.common.dao.core.model.DataRowModel;
 import com.code.common.dao.jdbc.operator.Software;
 import com.code.pipeline.core.*;
-import com.code.pipeline.etl.InputAdaptWorker;
-import com.code.pipeline.etl.OutputAdaptWorker;
-import com.code.pipeline.etl.renyuan.worker.ContentCreateWorker;
-import com.code.pipeline.etl.renyuan.worker.FieldMapper;
+import com.code.pipeline.worker.InputAdaptWorker;
+import com.code.pipeline.worker.OutputAdaptWorker;
+import com.code.pipeline.worker.renyuan.worker.ContentCreateWorker;
+import com.code.pipeline.worker.renyuan.worker.FieldMapper;
 import com.code.tooltrans.common.IDataSource;
 import com.code.tooltrans.common.IDataTarget;
 import com.code.tooltrans.common.RdbDataSource;
@@ -22,8 +22,8 @@ import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class RenYuanRelationFilpDemo {
-    private static final Logger logger = LoggerFactory.getLogger(RenYuanRelationFilpDemo.class);
+public class RenYuanDemo {
+    private static final Logger logger = LoggerFactory.getLogger(RenYuanDemo.class);
 
     @Test
     public void test() throws InterruptedException {
@@ -116,6 +116,10 @@ public class RenYuanRelationFilpDemo {
 
     private IDataTarget getDataTarget() {
         return new ElasticsearchTarget("192.168.125.5", "9400");
+//        return new CsvTarget("C:\\Users\\joshua\\Desktop\\spark\\test1.txt", Arrays.asList(
+//                "LEFT_ID", "LEFT_TYPE", "LEFT_SX", "LEFT_OBJ_ID", "RIGHT_NAME",
+//                "RELATION_TYPE",
+//                "RIGHT_ID", "RIGHT_TYPE", "RIGHT_SX", "RIGHT_OBJ_ID", "RIGHT_NAME"));
     }
 
     @NotNull
@@ -125,12 +129,13 @@ public class RenYuanRelationFilpDemo {
                 Arrays.asList(
                         new FieldMapper("车", "RIGHT_NAME", "CPH")
                         , new FieldMapper("LEFT_OBJ_ID", "SFZHM")
+                        , new FieldMapper("XM", "XM")
                 ),
                 Arrays.asList(
                         new FieldMapper("车", "RIGHT_NAME", "车牌号")
                         , new FieldMapper("LEFT_SX", "属性")
                         , new FieldMapper("LEFT_OBJ_ID", "身份证号码")
-                        , new FieldMapper("LEFT_OBJ_NAME", "姓名")
+                        , new FieldMapper("XM", "姓名")
                 )
         );
     }

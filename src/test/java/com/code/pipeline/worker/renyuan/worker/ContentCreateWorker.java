@@ -1,4 +1,4 @@
-package com.code.pipeline.etl.renyuan.worker;
+package com.code.pipeline.worker.renyuan.worker;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;

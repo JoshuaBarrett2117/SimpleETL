@@ -1,4 +1,4 @@
-package com.code.pipeline.etl;
+package com.code.pipeline.worker;
 
 import com.code.pipeline.core.AbstractWorker;
 

@@ -1,7 +1,6 @@
 package com.code.tooltrans.common.target.elasticsearch;
 
 import com.code.common.dao.core.model.DataRowModel;
-import com.code.tooltrans.common.IDataTarget;
 import com.code.tooltrans.common.target.AbstractTarget;
 import com.google.gson.GsonBuilder;
 import io.searchbox.client.JestClient;
@@ -36,8 +35,8 @@ public class ElasticsearchTarget extends AbstractTarget {
         factory.setHttpClientConfig(new HttpClientConfig
                 .Builder("http://" + ip + ":" + port)
                 .gson(new GsonBuilder().setDateFormat("yyyy-MM-dd'T'hh:mm:ss").create())
-                .connTimeout(3000)
-                .readTimeout(3000)
+                .connTimeout(60000)
+                .readTimeout(60000)
                 .multiThreaded(true)
                 .build());
         return factory.getObject();

@@ -1,6 +1,5 @@
-package com.code.pipeline.etl;
+package com.code.pipeline.worker;
 
-import com.code.common.dao.core.model.DataRowModel;
 import com.code.pipeline.core.Worker;
 
 /**
